@@ -12,3 +12,5 @@ npm-debug.log
 yarn-error.log
 .docker/mysql/dbdata
 .idea
+.phpstorm.meta.php
+_ide_helper.php
