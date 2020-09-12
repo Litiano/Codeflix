@@ -14,7 +14,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 ######################### FPM #############################################
 FROM base AS php
 
-RUN usermod -u 1000 www-data
+RUN usermod -u 1000 www-data && RUN usermod -g 1000 www-data
 USER www-data
 
 ######################### XDEBUG ##########################################
@@ -24,5 +24,5 @@ RUN apk add --no-cache $PHPIZE_DEPS
 RUN pecl install xdebug
 RUN docker-php-ext-enable xdebug
 
-RUN usermod -u 1000 www-data
+RUN usermod -u 1000 www-data && RUN usermod -g 1000 www-data
 USER www-data

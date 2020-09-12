@@ -16,7 +16,7 @@ abstract class UuidModel extends Model
     protected static function boot()
     {
         parent::boot();
-        static::creating(function (Model $obj) {
+        static::creating(function (UuidModel $obj) {
             $obj->{$obj->primaryKey} = Uuid::uuid4()->toString();
         });
     }

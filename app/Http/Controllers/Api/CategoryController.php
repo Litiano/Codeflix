@@ -22,7 +22,7 @@ class CategoryController extends Controller
     {
         $this->validate($request,$this->rules);
 
-        return Category::create($request->all());
+        return Category::create($request->all())->refresh();
     }
 
     public function show(Category $category)
