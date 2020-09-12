@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9e53cb6d08ddc83b0c1a60254c2c1712",
+    "content-hash": "3c7b238f4e5a298857d675c9a6ec2fb2",
     "packages": [
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -422,16 +422,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v6.18.38",
+            "version": "v6.18.40",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "94a29cadcc0d48b89b4aa820f414fb7721ba0e22"
+                "reference": "e42450df0896b7130ccdb5290a114424e18887c9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/94a29cadcc0d48b89b4aa820f414fb7721ba0e22",
-                "reference": "94a29cadcc0d48b89b4aa820f414fb7721ba0e22",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/e42450df0896b7130ccdb5290a114424e18887c9",
+                "reference": "e42450df0896b7130ccdb5290a114424e18887c9",
                 "shasum": ""
             },
             "require": {
@@ -567,7 +567,7 @@
                 "framework",
                 "laravel"
             ],
-            "time": "2020-09-01T13:40:51+00:00"
+            "time": "2020-09-09T15:02:20+00:00"
         },
         {
             "name": "laravel/telescope",
@@ -7724,7 +7724,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": "^7.2"
+        "php": "^7.4"
     },
     "platform-dev": [],
     "plugin-api-version": "1.1.0"
