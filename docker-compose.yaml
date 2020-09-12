@@ -26,6 +26,7 @@ services:
     build: .docker/mysql
     volumes:
       - .docker/mysql/dbdata:/var/lib/mysql
+      - .docker/mysql/entrypoint-initdb:/docker-entrypoint-initdb.d
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --innodb-use-native-aio=0
     ports:
       - '33006:3306'
