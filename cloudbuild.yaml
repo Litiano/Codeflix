@@ -5,23 +5,23 @@ steps:
 
   - id: 'Rodando id'
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', 'id']
+    args: ['exec', '-t', 'php', 'id']
 
   - id: 'Rodando ls'
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', 'ls']
+    args: ['exec', '-t', 'php', 'ls']
 
   - id: 'Rodando ls ..'
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', 'ls', './..']
+    args: ['exec', '-t', 'php', 'ls', './..']
 
   - id: 'Rodando id www-data'
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', '-u', 'www-data', 'id']
+    args: ['exec', '-t', '-u', 'www-data', 'php', 'id']
 
   - id: 'Rodando id root'
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', '-u', 'root', 'id']
+    args: ['exec', '-t', '-u', 'root', 'php', 'id']
 
   - id: 'Rodando composer'
     name: 'gcr.io/cloud-builders/docker'
