@@ -5,7 +5,7 @@ services:
       context: .docker/php
       target: php
     container_name: php
-    entrypoint: dockerize -wait tcp://mysql:3306 -timeout 40s .docker/php/entrypoint.sh
+    entrypoint: dockerize -wait tcp://mysql:3306 -timeout 40s php-fpm
     volumes:
       - .:/var/www/html
       - .docker/php/.user.ini:/usr/local/etc/php/conf.d/user.ini
