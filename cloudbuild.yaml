@@ -3,25 +3,9 @@ steps:
     name: 'gcr.io/$PROJECT_ID/docker-compose'
     args: ['-f', 'docker-compose.prod.yaml', 'up', '-d']
 
-  - id: 'Rodando id'
+  - id: 'Rodando chown'
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', 'php', 'id']
-
-  - id: 'Rodando ls'
-    name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', 'php', 'ls', '-la']
-
-  - id: 'Rodando ls ..'
-    name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', 'php', 'ls', '-la', './..']
-
-  - id: 'Rodando id www-data'
-    name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', '-u', 'www-data', 'php', 'id']
-
-  - id: 'Rodando id root'
-    name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', '-u', 'root', 'php', 'id']
+    args: ['exec', '-t', '-u', 'root', 'php', 'chown', '-R', 'www-data:www-data', '.']
 
   - id: 'Rodando composer'
     name: 'gcr.io/cloud-builders/docker'
