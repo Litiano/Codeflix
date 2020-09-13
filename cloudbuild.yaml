@@ -11,15 +11,15 @@ steps:
     name: 'gcr.io/cloud-builders/docker'
     args: ['exec', '-t', 'ls']
 
-  - id: 'Rodando ls'
+  - id: 'Rodando ls ..'
     name: 'gcr.io/cloud-builders/docker'
     args: ['exec', '-t', 'ls', './..']
 
-  - id: 'Rodando id'
+  - id: 'Rodando id www-data'
     name: 'gcr.io/cloud-builders/docker'
     args: ['exec', '-t', '-u', 'www-data', 'id']
 
-  - id: 'Rodando id'
+  - id: 'Rodando id root'
     name: 'gcr.io/cloud-builders/docker'
     args: ['exec', '-t', '-u', 'root', 'id']
 
