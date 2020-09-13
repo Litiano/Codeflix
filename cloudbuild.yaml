@@ -9,11 +9,11 @@ steps:
 
   - id: 'Rodando ls'
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', 'php', 'ls']
+    args: ['exec', '-t', 'php', 'ls', '-la']
 
   - id: 'Rodando ls ..'
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', 'php', 'ls', './..']
+    args: ['exec', '-t', 'php', 'ls', '-la', './..']
 
   - id: 'Rodando id www-data'
     name: 'gcr.io/cloud-builders/docker'
