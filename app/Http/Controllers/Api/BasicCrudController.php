@@ -14,6 +14,7 @@ abstract class BasicCrudController extends Controller
      */
     abstract protected function model():string;
     abstract protected function rulesStore():array;
+    abstract protected function rulesUpdate():array;
 
     public function index()
     {
@@ -30,35 +31,37 @@ abstract class BasicCrudController extends Controller
         return $model;
     }
 
+    /**
+     * @param $id
+     * @return Model
+     */
     protected function findOrFail($id)
     {
         $model = $this->model();
         $keyName = (new $model)->getRouteKeyName();
+
         return $this->model()::where($keyName, $id)->firstOrFail();
     }
 
-    public function show()
+    public function show($id)
     {
-
+        return $this->findOrFail($id);
     }
 
-//    public function show(Category $category)
-//    {
-//        return $category;
-//    }
-//
-//    public function update(Request $request, Category $category)
-//    {
-//        $this->validate($request, $this->rules);
-//        $category->update($request->all());
-//
-//        return $category;
-//    }
-//
-//    public function destroy(Category $category)
-//    {
-//        $category->delete();
-//
-//        return response()->noContent();
-//    }
+    public function update(Request $request, $id)
+    {
+        $model = $this->findOrFail($id);
+        $validatedData = $this->validate($request, $this->rulesUpdate());
+        $model->update($validatedData);
+
+        return $model;
+    }
+
+    public function destroy($id)
+    {
+        $model = $this->findOrFail($id);
+        $model->delete();
+
+        return response()->noContent();
+    }
 }
