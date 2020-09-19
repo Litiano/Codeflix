@@ -7,7 +7,7 @@ use App\Models\UuidModel;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Tests\TestCase;
 
-class CategoryTest extends TestCase
+class CategoryUnitTest extends TestCase
 {
     private Category $category;
 

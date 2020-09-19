@@ -7,7 +7,7 @@ use App\Models\UuidModel;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use PHPUnit\Framework\TestCase;
 
-class GenreTest extends TestCase
+class GenreUnitTest extends TestCase
 {
     private Genre $genre;
 
