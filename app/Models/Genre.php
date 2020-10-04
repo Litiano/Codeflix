@@ -36,4 +36,9 @@ class Genre extends UuidModel
     protected $casts = [
         'is_active' => 'bool'
     ];
+
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class);
+    }
 }
