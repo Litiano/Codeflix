@@ -3,7 +3,7 @@
 namespace Tests\Unit\Models;
 
 use App\Models\Category;
-use App\Models\UuidModel;
+use App\Models\Traits\UuidModel;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Tests\TestCase;
 

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 
+use App\Models\Traits\UuidModel;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CastMember extends UuidModel
