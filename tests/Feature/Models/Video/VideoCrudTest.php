@@ -1,33 +1,17 @@
 <?php
 
-namespace Tests\Feature\Models;
+
+namespace Tests\Feature\Models\Video;
+
 
 use App\Models\Category;
 use App\Models\Genre;
 use App\Models\Video;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\QueryException;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Tests\TestCase;
 
-class VideoTest extends TestCase
+class VideoCrudTest extends BaseVideoTestCase
 {
-    use DatabaseMigrations;
-
-    protected array $data;
-
-    protected function setUp(): void
-    {
-        $this->data = [
-            'title' => 'title',
-            'description' => 'description',
-            'year_launched' => 2011,
-            'rating' => Video::RATING_LIST[0],
-            'duration' => 90,
-        ];
-        parent::setUp();
-    }
-
     public function testList()
     {
         factory(Video::class)->create();
@@ -152,8 +136,8 @@ class VideoTest extends TestCase
         $genre = factory(Genre::class)->create();
         $video = factory(Video::class)->create();
         $video->update([
-                'categories_id' => [$category->id],
-                'genres_id' => [$genre->id],
+            'categories_id' => [$category->id],
+            'genres_id' => [$genre->id],
         ]);
 
         $this->assertHasCategory($video->id, $category->id);
