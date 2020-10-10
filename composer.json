@@ -15,7 +15,8 @@
         "laravel/telescope": "^3.5",
         "laravel/tinker": "^2.0",
         "lucascudo/laravel-pt-br-localization": "^1.1",
-        "waavi/sanitizer": "^1.0"
+        "waavi/sanitizer": "^1.0",
+        "ext-gd": "*"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.5",
