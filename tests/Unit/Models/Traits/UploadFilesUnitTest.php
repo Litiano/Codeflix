@@ -17,6 +17,21 @@ class UploadFilesUnitTest extends TestCase
         $this->object = new UploadFilesStub();
     }
 
+    public function testDeleteOldFiles()
+    {
+        \Storage::fake();
+        $file1 = UploadedFile::fake()->create('video1.mp4')->size(1);
+        $file2 = UploadedFile::fake()->create('video2.mp4')->size(2);
+        $this->object->uploadFiles([$file1, $file2]);
+        $this->object->deleteOldFiles();
+        $this->assertCount(2, \Storage::allFiles());
+
+        $this->object->oldFiles = [$file1->hashName()];
+        $this->object->deleteOldFiles();
+        \Storage::assertMissing("1/{$file1->hashName()}");
+        \Storage::assertExists("1/{$file2->hashName()}");
+    }
+
     public function testUploadFile()
     {
         Storage::fake();

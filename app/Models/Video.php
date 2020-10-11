@@ -21,6 +21,7 @@ class Video extends UuidModel
         'rating',
         'duration',
         'video_file',
+        'thumb_file',
     ];
 
     protected $casts = [
@@ -41,10 +42,10 @@ class Video extends UuidModel
             \DB::commit();
             return $obj;
         } catch (\Exception $e) {
-            \DB::rollBack();
             if (isset($obj)) {
-                // delete files
+                $obj->deleteFiles($files);
             }
+            \DB::rollBack();
             throw $e;
         }
     }
@@ -58,13 +59,15 @@ class Video extends UuidModel
             static::handleRelations($this, $attributes);
             if ($updated) {
                 $this->uploadFiles($files);
-                // delete old files
             }
             \DB::commit();
+            if ($updated && count($files)) {
+                $this->deleteOldFiles();
+            }
             return $updated;
         } catch (\Exception $e) {
             \DB::rollBack();
-            // delete files
+            $this->deleteFiles($files);
             throw $e;
         }
     }
@@ -94,8 +97,8 @@ class Video extends UuidModel
         return $this->id;
     }
 
-    protected static function getFileFields(): array
+    public static function getFileFields(): array
     {
-        return ['video_file'];
+        return ['video_file', 'thumb_file'];
     }
 }
