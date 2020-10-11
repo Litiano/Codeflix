@@ -9,14 +9,15 @@
     "license": "MIT",
     "require": {
         "php": "^7.4",
+        "ext-gd": "*",
         "fideloper/proxy": "^4.0",
         "haruncpi/laravel-log-reader": "^1.0",
         "laravel/framework": "^6.18.35",
         "laravel/telescope": "^3.5",
         "laravel/tinker": "^2.0",
         "lucascudo/laravel-pt-br-localization": "^1.1",
-        "waavi/sanitizer": "^1.0",
-        "ext-gd": "*"
+        "superbalist/laravel-google-cloud-storage": "^2.2",
+        "waavi/sanitizer": "^1.0"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.5",
