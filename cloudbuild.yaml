@@ -1,7 +1,23 @@
 steps:
+  - id: 'Descriptografar service-account-storage.json.env'
+    name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - kms
+      - decrypt
+      - --ciphertext-file=./storage/credentials/google/service-account-storage.json.enc
+      - --plaintext-file=./storage/credentials/google/service-account-storage.json
+      - --location=global
+      - --keyring=testing-lesson
+      - --key=service-account
+
   - id: 'Rodando docker-compose'
     name: 'gcr.io/$PROJECT_ID/docker-compose'
     args: ['-f', 'docker-compose.prod.yaml', 'up', '-d']
+    env:
+      - GOOGLE_CLOUD_PROJECT_ID=$PROJECT_ID
+      - GOOGLE_CLOUD_KEY_FILE=service-account-storage.json
+      - GOOGLE_CLOUD_STORAGE_BUCKET=codeflix-videos
+      - TEST_PROD=true
 
   - id: 'Rodando chown'
     name: 'gcr.io/cloud-builders/docker'

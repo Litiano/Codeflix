@@ -37,6 +37,6 @@ class UploadFilesStub extends \Illuminate\Database\Eloquent\Model
 
     protected static function getFileFields(): array
     {
-        return ['file1', 'file2'];
+        return ['file1', 'file2', 'film', 'trailer'];
     }
 }
