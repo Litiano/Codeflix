@@ -12,6 +12,11 @@ services:
     depends_on:
       - mysql
       - redis
+    environment:
+      - GOOGLE_CLOUD_PROJECT_ID=${GOOGLE_CLOUD_PROJECT_ID}
+      - GOOGLE_CLOUD_KEY_FILE=${GOOGLE_CLOUD_KEY_FILE}
+      - GOOGLE_CLOUD_STORAGE_BUCKET=${GOOGLE_CLOUD_STORAGE_BUCKET}
+      - TEST_PROD=${TEST_PROD}
   nginx:
     image: nginx:alpine
     container_name: nginx
