@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 
 abstract class BasicCrudController extends Controller
 {
@@ -15,10 +17,19 @@ abstract class BasicCrudController extends Controller
     abstract protected function model():string;
     abstract protected function rulesStore():array;
     abstract protected function rulesUpdate():array;
+    protected abstract function resourceCollection():string;
+    protected abstract function resource():string;
+    protected int $paginationSize = 15;
 
     public function index()
     {
-        return $this->model()::all();
+        $resource = $this->resourceCollection();
+        $data = !$this->paginationSize ? $this->model()::all() : $this->model()::paginate($this->paginationSize);
+
+        $refClass = new \ReflectionClass($resource);
+
+        return $refClass->isSubclassOf(ResourceCollection::class)
+            ? new $resource($data) : $resource::collection($data);
     }
 
     public function store(Request $request)
@@ -27,8 +38,9 @@ abstract class BasicCrudController extends Controller
         /** @var Model $model */
         $model = $this->model()::create($validatedData);
         $model->refresh();
+        $resource = $this->resource();
 
-        return $model;
+        return new $resource($model);
     }
 
     /**
@@ -45,7 +57,10 @@ abstract class BasicCrudController extends Controller
 
     public function show($id)
     {
-        return $this->findOrFail($id);
+        $obj = $this->findOrFail($id);
+        $resource = $this->resource();
+
+        return new $resource($obj);
     }
 
     public function update(Request $request, $id)
@@ -53,8 +68,9 @@ abstract class BasicCrudController extends Controller
         $model = $this->findOrFail($id);
         $validatedData = $this->validate($request, $this->rulesUpdate());
         $model->update($validatedData);
+        $resource = $this->resource();
 
-        return $model;
+        return new $resource($model);
     }
 
     public function destroy($id)

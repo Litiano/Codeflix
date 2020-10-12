@@ -21,8 +21,11 @@ class BasicCrudControllerTest extends TestCase
     {
         /** @var CategoryStub $category */
         $category = CategoryStub::create(['name' => 'teste name', 'description' => 'test descrição']);
-        $result = $this->controller->index()->toArray();
-        $this->assertEquals([$category->toArray()], $result);
+        $result = $this->controller->index();
+        $serialized = $result->response()->getData(true);
+        $this->assertEquals([$category->toArray()], $serialized['data']);
+        $this->assertArrayHasKey('meta', $serialized);
+        $this->assertArrayHasKey('links', $serialized);
     }
 
     public function testInvalidationDataStore()
@@ -47,8 +50,9 @@ class BasicCrudControllerTest extends TestCase
             ->once()
             ->andReturn(['name' => 'test name', 'description' => 'test description']);
 
-        $model = $this->controller->store($request);
-        $this->assertEquals(CategoryStub::first()->toArray(), $model->toArray());
+        $result = $this->controller->store($request);
+        $serialized = $result->response()->getData(true);
+        $this->assertEquals(CategoryStub::first()->toArray(), $serialized['data']);
     }
 
     public function testIfFindOrFailFetchModel()
@@ -77,7 +81,8 @@ class BasicCrudControllerTest extends TestCase
     {
         $category = CategoryStub::create(['name' => 'teste name', 'description' => 'test descrição'])->refresh();
         $result = $this->controller->show($category->id);
-        $this->assertEquals($result->toArray(), $category->toArray());
+        $serialized = $result->response()->getData(true);
+        $this->assertEquals($serialized['data'], $category->toArray());
     }
 
     public function testUpdate()
@@ -89,8 +94,9 @@ class BasicCrudControllerTest extends TestCase
             ->andReturn(['name' => 'test name change', 'description' => 'test description changed']);
 
         $result = $this->controller->update($request, $category->id);
+        $serialized = $result->response()->getData(true);
 
-        $this->assertEquals($result->toArray(), $category->refresh()->toArray());
+        $this->assertEquals($serialized['data'], $category->refresh()->toArray());
     }
 
     public function testDestroy()

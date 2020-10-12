@@ -2,24 +2,43 @@
 
 namespace Tests\Feature\Http\Controllers\Api;
 
+use App\Http\Resources\CastMemberResource;
 use App\Models\CastMember;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
+use Tests\Traits\TestResources;
 use Tests\Traits\TestSaves;
 use Tests\Traits\TestValidations;
 
 class CastMemberControllerTest extends TestCase
 {
-    use DatabaseMigrations, TestValidations, TestSaves;
+    use DatabaseMigrations, TestValidations, TestSaves, TestResources;
 
     private CastMember $castMember;
+
+    private array $fieldsSerialized = [
+        'id',
+        'name',
+        'type',
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
 
     public function testIndex()
     {
         $response = $this->getJson(route('api.cast_members.index'));
 
         $response->assertStatus(200)
-            ->assertJson([$this->castMember->toArray()]);
+            ->assertJson(['data' => [$this->castMember->toArray()]])
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => $this->fieldsSerialized
+                ],
+                'meta' => [],
+                'links' => [],
+            ]);
+        $this->assertResource($response, CastMemberResource::collection([$this->castMember]));
     }
 
     public function testShow()
@@ -27,7 +46,14 @@ class CastMemberControllerTest extends TestCase
         $response = $this->getJson(route('api.cast_members.show', $this->castMember));
 
         $response->assertStatus(200)
-            ->assertJson($this->castMember->toArray());
+            ->assertJson(['data' => $this->castMember->toArray()])
+            ->assertJsonStructure([
+                'data' => $this->fieldsSerialized
+            ]);
+
+        $id = $this->getIdFromResponse($response);
+        $castMember = CastMember::find($id);
+        $this->assertResource($response, new CastMemberResource($castMember));
     }
 
     public function testInvalidationData()
@@ -54,7 +80,11 @@ class CastMemberControllerTest extends TestCase
 
         foreach ($data as $item) {
             $response = $this->assertStore($item, $item + ['deleted_at' => null]);
-            $response->assertJsonStructure(['created_at', 'updated_at']);
+            $response->assertJsonStructure(['data' => $this->fieldsSerialized]);
+            $this->assertResource(
+                $response,
+                new CastMemberResource(CastMember::find($this->getIdFromResponse($response)))
+            );
         }
     }
 
@@ -65,10 +95,17 @@ class CastMemberControllerTest extends TestCase
         ]);
         $data = ['type' => CastMember::TYPE_ACTOR, 'name' => 'test'];
         $response = $this->assertUpdate($data, $data + ['deleted_at' => null]);
-        $response->assertJsonStructure(['created_at', 'updated_at']);
+        $response->assertJsonStructure(['data' => $this->fieldsSerialized]);
+        $this->assertResource(
+            $response, new CastMemberResource(CastMember::find($this->getIdFromResponse($response)))
+        );
 
         $data = ['name' => 'test 2', 'type' => CastMember::TYPE_DIRECTOR,];
-        $this->assertUpdate($data, $data);
+        $response = $this->assertUpdate($data, $data);
+        $response->assertJsonStructure(['data' => $this->fieldsSerialized]);
+        $this->assertResource(
+            $response, new CastMemberResource(CastMember::find($this->getIdFromResponse($response)))
+        );
     }
 
     public function testDestroy()

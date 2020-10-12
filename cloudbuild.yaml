@@ -43,6 +43,10 @@ steps:
     name: 'gcr.io/cloud-builders/docker'
     args: ['exec', '-t', 'php', 'php', 'artisan', 'migrate']
 
+  - id: 'Rodando storage:link'
+    name: 'gcr.io/cloud-builders/docker'
+    args: [ 'exec', '-t', 'php', 'php', 'artisan', 'storage:link' ]
+
   - id: 'Rodando PhpUnit'
     name: 'gcr.io/cloud-builders/docker'
     args: ['exec', '-t', 'php', 'php', 'vendor/bin/phpunit', '-c', 'phpunit.xml']

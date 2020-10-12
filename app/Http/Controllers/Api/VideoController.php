@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Resources\VideoResource;
 use App\Models\Video;
 use App\Rules\GenresHasCategoriesRule;
-use DB;
 use Illuminate\Http\Request;
 
 class VideoController extends BasicCrudController
@@ -22,7 +22,10 @@ class VideoController extends BasicCrudController
             'duration' => ['required', 'integer'],
             'categories_id' => ['required', 'array', 'exists:App\Models\Category,id,deleted_at,NULL'],
             'genres_id' => ['required', 'array', 'exists:App\Models\Genre,id,deleted_at,NULL'],
-            'video_file' => ['mimetypes:video/mp4', 'max:5120'], //5Mb
+            'thumb_file' => ['image', 'max:' . Video::THUMB_FILE_MAX_SIZE],
+            'banner_file' => ['image', 'max:' . Video::BANNER_FILE_MAX_SIZE],
+            'trailer_file' => ['mimetypes:video/mp4', 'max:' . Video::TRAILER_FILE_MAX_SIZE],
+            'video_file' => ['mimetypes:video/mp4', 'max:' . Video::VIDEO_FILE_MAX_SIZE],
         ];
     }
 
@@ -33,8 +36,9 @@ class VideoController extends BasicCrudController
         /** @var Video $video */
         $video = $this->model()::create($validatedData);
         $video->refresh();
+        $resource = $this->resource();
 
-        return $video;
+        return new $resource($video);
     }
 
     public function update(Request $request, $id)
@@ -44,8 +48,9 @@ class VideoController extends BasicCrudController
         $video = $this->findOrFail($id);
         $validatedData = $this->validate($request, $this->rulesUpdate());
         $video->update($validatedData);
+        $resource = $this->resource();
 
-        return $video;
+        return new $resource($video);
     }
 
     protected function addRulesIfGenresHasCategories(Request $request)
@@ -53,7 +58,6 @@ class VideoController extends BasicCrudController
         $categoriesId = $request->input('categories_id', []);
         $categoriesId = is_array($categoriesId) ? $categoriesId : [];
         $this->rules['genres_id'][] = new GenresHasCategoriesRule($categoriesId);
-        //$this->rules['genres_id'][] = new GenresHasCategoriesRule($request->input('categories_id') ?? []);
     }
 
     protected function model(): string
@@ -69,5 +73,15 @@ class VideoController extends BasicCrudController
     protected function rulesUpdate(): array
     {
         return $this->rules;
+    }
+
+    protected function resourceCollection(): string
+    {
+        return $this->resource();
+    }
+
+    protected function resource(): string
+    {
+        return VideoResource::class;
     }
 }
