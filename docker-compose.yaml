@@ -44,7 +44,7 @@ services:
       - .docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
     environment:
       - PHP_IDE_CONFIG=serverName=localhost
-      - XDEBUG_CONFIG=remote_host=192.168.0.4 remote_port=9000
+      - XDEBUG_CONFIG=remote_host=192.168.0.5 remote_port=9000
     entrypoint: dockerize -wait tcp://mysql:3306 -timeout 40s php-fpm
     depends_on:
       - mysql

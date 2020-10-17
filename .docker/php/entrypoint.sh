@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck disable=SC2164
+cd backend
+
 chown -R www-data:www-data .
 composer install
 
