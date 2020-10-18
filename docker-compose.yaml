@@ -4,6 +4,8 @@ services:
     build:
       context: .docker/php
       target: php
+    ports:
+      - '3000:3000'
     entrypoint: dockerize -wait tcp://mysql:3306 -timeout 40s .docker/php/entrypoint.sh
     volumes:
       - .:/var/www/html

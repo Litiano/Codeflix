@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#npm config set cache /var/www/.npm-cache --global
+cd frontend && yarn install && cd ..
+
 # shellcheck disable=SC2164
 cd backend
 
