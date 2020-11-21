@@ -10,6 +10,7 @@
     "require": {
         "php": "^7.4",
         "ext-gd": "*",
+        "barryvdh/laravel-cors": "^2.0",
         "fideloper/proxy": "^4.0",
         "haruncpi/laravel-log-reader": "^1.0",
         "laravel/framework": "^6.18.35",
