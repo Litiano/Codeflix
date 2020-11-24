@@ -19,7 +19,7 @@ const columnsDefinition: MUIDataTableColumn[] = [
         name: 'type',
         label: 'Tipo',
         options: {
-            customBodyRender(value: 1|2, tableMeta, updateValue) {
+            customBodyRender(value, tableMeta, updateValue) {
                 return <span>{CastMemberTypes[value]}</span>
             }
         }

@@ -1,8 +1,11 @@
 import {RouteProps} from "react-router-dom"
 import Dashboard from "../pages/Dashboard";
 import CategoryList from "../pages/category/PageList";
-import CastMemberList from "../pages/castMember/PageList";
+import CategoryCreate from "../pages/category/PageForm";
+import CastMemberList from "../pages/cast-member/PageList";
+import CastMemberCreate from "../pages/cast-member/PageForm";
 import GenresList from "../pages/genres/PageList";
+import GenresCreate from "../pages/genres/PageForm";
 
 export interface MyRouteProps extends RouteProps {
     name: string;
@@ -28,14 +31,14 @@ const routes: MyRouteProps[] = [
         name: 'categories.create',
         label: 'Criar categoria',
         path: '/categories/create',
-        component: CategoryList,
+        component: CategoryCreate,
         exact: true
     },
     {
         name: 'categories.edit',
         label: 'Editar categoria',
         path: '/categories/:id/edit',
-        component: CategoryList,
+        component: CategoryCreate,
         exact: true
     },
     ////////////////////
@@ -50,14 +53,14 @@ const routes: MyRouteProps[] = [
         name: 'cast-members.create',
         label: 'Criar membro',
         path: '/cast-members/create',
-        component: CastMemberList,
+        component: CastMemberCreate,
         exact: true
     },
     {
         name: 'cast-members.edit',
         label: 'Editar membro',
         path: '/cast-members/:id/edit',
-        component: CastMemberList,
+        component: CastMemberCreate,
         exact: true
     },
     ////////////////////////////////
@@ -72,14 +75,14 @@ const routes: MyRouteProps[] = [
         name: 'genres.create',
         label: 'Criar gênero',
         path: '/genres/create',
-        component: GenresList,
+        component: GenresCreate,
         exact: true
     },
     {
         name: 'genres.edit',
         label: 'Editar gênero',
         path: '/genres/:id/edit',
-        component: GenresList,
+        component: GenresCreate,
         exact: true
     },
 ];
