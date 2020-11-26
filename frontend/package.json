@@ -30,10 +30,11 @@
     "typescript": "~3.7.2"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "npm run copy-env; react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "copy-env": "[ ! -f .env ] && cp .env.example .env || exit 0"
   },
   "eslintConfig": {
     "extends": "react-app"
