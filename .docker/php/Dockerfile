@@ -1,4 +1,4 @@
-FROM php:7.4-fpm-alpine AS base
+FROM php:8.0-fpm-alpine AS base
 
 RUN apk add --no-cache shadow openssl bash nano freetype-dev libjpeg-turbo-dev libpng-dev nodejs npm yarn
 
