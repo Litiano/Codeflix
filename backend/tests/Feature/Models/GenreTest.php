@@ -28,7 +28,7 @@ class GenreTest extends TestCase
     {
         $genre = Genre::create(['name' => 'Genre 1'])->refresh();
         $this->assertEquals(36, strlen($genre->id));
-        $this->assertRegExp('/[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}/', $genre->id);
+        $this->assertMatchesRegularExpression('/[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}/', $genre->id);
         $this->assertEquals('Genre 1', $genre->name);
         $this->assertTrue($genre->is_active);
 

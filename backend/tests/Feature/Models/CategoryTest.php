@@ -28,7 +28,7 @@ class CategoryTest extends TestCase
     {
         $category = Category::create(['name' => 'Categoria 1'])->refresh();
         $this->assertEquals(36, strlen($category->id));
-        $this->assertRegExp('/[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}/', $category->id);
+        $this->assertMatchesRegularExpression('/[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}/', $category->id);
         $this->assertEquals('Categoria 1', $category->name);
         $this->assertNull($category->description);
         $this->assertTrue($category->is_active);

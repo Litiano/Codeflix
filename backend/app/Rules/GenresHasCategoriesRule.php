@@ -8,15 +8,9 @@ use Illuminate\Support\Collection;
 
 class GenresHasCategoriesRule implements Rule
 {
-    private array $categoriesId;
     private array $genresId;
 
-    /**
-     * Create a new rule instance.
-     *
-     * @param array $categoriesId
-     */
-    public function __construct(array $categoriesId)
+    public function __construct(private array $categoriesId)
     {
         $this->categoriesId = array_unique($categoriesId);
     }
@@ -28,7 +22,7 @@ class GenresHasCategoriesRule implements Rule
      * @param  mixed  $value
      * @return bool
      */
-    public function passes($attribute, $value)
+    public function passes($attribute, $value): bool
     {
         if (!is_array($value)) {
             return false;
@@ -64,10 +58,8 @@ class GenresHasCategoriesRule implements Rule
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
-    public function message()
+    public function message(): string
     {
         return 'A genre ID must be related at least a category ID.';
     }

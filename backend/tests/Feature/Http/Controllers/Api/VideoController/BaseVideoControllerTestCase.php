@@ -41,17 +41,17 @@ abstract class BaseVideoControllerTestCase extends TestCase
         ];
     }
 
-    protected function routeStore()
+    protected function routeStore(): string
     {
         return route('api.videos.store');
     }
 
-    protected function routeUpdate()
+    protected function routeUpdate(): string
     {
         return route('api.videos.update', $this->video);
     }
 
-    protected function model()
+    protected function model(): string
     {
         return Video::class;
     }

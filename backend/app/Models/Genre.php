@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Traits\UuidModel;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -40,7 +41,7 @@ class Genre extends UuidModel
         'is_active' => 'bool'
     ];
 
-    public function categories()
+    public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class);
     }

@@ -11,14 +11,11 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 
 abstract class BasicCrudController extends Controller
 {
-    /**
-     * @return Model
-     */
-    abstract protected function model():string;
-    abstract protected function rulesStore():array;
-    abstract protected function rulesUpdate():array;
-    protected abstract function resourceCollection():string;
-    protected abstract function resource():string;
+    abstract protected function model(): string|Model;
+    abstract protected function rulesStore(): array;
+    abstract protected function rulesUpdate(): array;
+    protected abstract function resourceCollection(): string|JsonResource;
+    protected abstract function resource(): string|JsonResource;
     protected int $paginationSize = 15;
 
     public function index()

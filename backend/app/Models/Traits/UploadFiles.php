@@ -13,7 +13,7 @@ trait UploadFiles
 {
     public array $oldFiles = [];
 
-    public static function bootUploadFiles()
+    public static function bootUploadFiles(): void
     {
         self::updating(function (Model $model) {
             $fieldsUpdated = array_keys($model->getDirty());
@@ -27,40 +27,37 @@ trait UploadFiles
         });
     }
 
-    public function uploadFiles(array $files)
+    public function uploadFiles(array $files): void
     {
         foreach ($files as $file) {
             $this->uploadFile($file);
         }
     }
 
-    public function uploadFile(UploadedFile $file)
+    public function uploadFile(UploadedFile $file): void
     {
         $file->store($this->uploadDir());
     }
 
-    public function deleteOldFiles()
+    public function deleteOldFiles(): void
     {
         $this->deleteFiles($this->oldFiles);
     }
 
-    public function deleteFiles(array $files)
+    public function deleteFiles(array $files): void
     {
         foreach ($files as $file) {
             $this->deleteFile($file);
         }
     }
 
-    /**
-     * @param string|UploadedFile $file
-     */
-    public function deleteFile($file)
+    public function deleteFile(string|UploadedFile $file): void
     {
         $fileName = $file instanceof UploadedFile ? $file->hashName() : $file;
         Storage::delete("{$this->uploadDir()}/$fileName");
     }
 
-    public static function extractFiles(array &$attributes = [])
+    public static function extractFiles(array &$attributes = []): array
     {
         $files = [];
         foreach (self::getFileFields() as $field) {
@@ -73,17 +70,17 @@ trait UploadFiles
         return $files;
     }
 
-    public function relativeFilePath(?string $fileName)
+    public function relativeFilePath(?string $fileName): string
     {
         return "{$this->uploadDir()}/{$fileName}";
     }
 
-    protected function getFileUrl(string $fileName)
+    protected function getFileUrl(string $fileName): string
     {
         return Storage::url($this->relativeFilePath($fileName));
     }
 
-    protected abstract function uploadDir():string;
+    protected abstract function uploadDir(): string;
 
-    protected abstract static function getFileFields():array;
+    protected abstract static function getFileFields(): array;
 }

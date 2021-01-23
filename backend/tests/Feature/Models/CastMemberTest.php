@@ -26,7 +26,7 @@ class CastMemberTest extends TestCase
     {
         $castMember = CastMember::create(['name' => 'Categoria 1', 'type' => CastMember::TYPE_DIRECTOR])->refresh();
         $this->assertEquals(36, strlen($castMember->id));
-        $this->assertRegExp('/[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}/', $castMember->id);
+        $this->assertMatchesRegularExpression('/[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}/', $castMember->id);
         $this->assertEquals('Categoria 1', $castMember->name);
         $this->assertNull($castMember->deleted_at);
     }

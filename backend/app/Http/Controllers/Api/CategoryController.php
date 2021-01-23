@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
+use Illuminate\Http\Resources\Json\JsonResource;
+
 class CategoryController extends BasicCrudController
 {
     private $rules = [
@@ -27,12 +29,12 @@ class CategoryController extends BasicCrudController
         return $this->rules;
     }
 
-    protected function resourceCollection(): string
+    protected function resourceCollection(): string|JsonResource
     {
         return $this->resource();
     }
 
-    protected function resource():string
+    protected function resource(): string|JsonResource
     {
         return CategoryResource::class;
     }

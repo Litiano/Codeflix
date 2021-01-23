@@ -131,17 +131,17 @@ class CategoryControllerTest extends TestCase
         $this->category = factory(Category::class)->create();
     }
 
-    protected function routeStore()
+    protected function routeStore(): string
     {
         return route('api.categories.store');
     }
 
-    protected function routeUpdate()
+    protected function routeUpdate(): string
     {
         return route('api.categories.update', $this->category);
     }
 
-    protected function model()
+    protected function model(): string
     {
         return Category::class;
     }

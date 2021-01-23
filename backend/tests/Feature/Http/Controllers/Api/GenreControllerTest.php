@@ -261,17 +261,17 @@ class GenreControllerTest extends TestCase
         $this->genre = factory(Genre::class)->create();
     }
 
-    protected function routeStore()
+    protected function routeStore(): string
     {
         return route('api.genres.store');
     }
 
-    protected function routeUpdate()
+    protected function routeUpdate(): string
     {
         return route('api.genres.update', $this->genre);
     }
 
-    protected function model()
+    protected function model(): string
     {
         return Genre::class;
     }

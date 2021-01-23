@@ -122,17 +122,17 @@ class CastMemberControllerTest extends TestCase
         $this->castMember = factory(CastMember::class)->create(['type' => CastMember::TYPE_DIRECTOR]);
     }
 
-    protected function routeStore()
+    protected function routeStore(): string
     {
         return route('api.cast_members.store');
     }
 
-    protected function routeUpdate()
+    protected function routeUpdate(): string
     {
         return route('api.cast_members.update', $this->castMember);
     }
 
-    protected function model()
+    protected function model(): string
     {
         return CastMember::class;
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Resources\CastMemberResource;
 use App\Models\CastMember;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class CastMemberController extends BasicCrudController
 {
@@ -32,12 +33,12 @@ class CastMemberController extends BasicCrudController
         return $this->rules;
     }
 
-    protected function resource(): string
+    protected function resource(): string|JsonResource
     {
         return CastMemberResource::class;
     }
 
-    protected function resourceCollection(): string
+    protected function resourceCollection(): string|JsonResource
     {
         return $this->resource();
     }
