@@ -7,6 +7,7 @@ import map from "lodash/map";
 import genreHttp from "../../utils/http/genre-http";
 import {Genre, ListResponse} from "../../utils/models";
 import DefaultTable from '../../components/Table';
+import {useSnackbar} from "notistack";
 
 const columnsDefinition: MUIDataTableColumn[] = [
     {
@@ -47,13 +48,23 @@ type Props = {
 };
 const Table = (props: Props) => {
     const [data, setData] = useState<Genre[]>([]);
+    const snackbar = useSnackbar();
+    const [loading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
         let isCancelled = false;
         (async () => {
-            const {data} = await genreHttp.list<ListResponse<Genre>>();
-            if (!isCancelled) {
-                setData(data.data);
+            setLoading(true);
+            try {
+                const {data} = await genreHttp.list<ListResponse<Genre>>();
+                if (!isCancelled) {
+                    setData(data.data);
+                }
+            } catch (error) {
+                console.error(error);
+                snackbar.enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
+            } finally {
+                setLoading(false);
             }
         })();
 
@@ -64,7 +75,7 @@ const Table = (props: Props) => {
 
     return (
         <div>
-            <DefaultTable columns={columnsDefinition} title='Listagem de gêneros' data={data}/>
+            <DefaultTable columns={columnsDefinition} title='Listagem de gêneros' data={data} loading={loading}/>
         </div>
     );
 };
