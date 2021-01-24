@@ -1,4 +1,4 @@
-FROM php:7.4-fpm-alpine AS base
+FROM php:8.0-fpm-alpine AS base
 
 RUN apk add --no-cache shadow openssl bash nano freetype-dev libjpeg-turbo-dev libpng-dev nodejs npm yarn
 
@@ -12,6 +12,8 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
     && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+RUN touch /home/www-data/.bashrc | echo "PS1='\w\$ '" >> /home/www-data/.bashrc
 
 ######################### FPM #############################################
 FROM base AS php

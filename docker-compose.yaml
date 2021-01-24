@@ -4,6 +4,8 @@ services:
     build:
       context: .docker/php
       target: php
+    ports:
+      - '3000:3000'
     entrypoint: dockerize -wait tcp://mysql:3306 -timeout 40s .docker/php/entrypoint.sh
     volumes:
       - .:/var/www/html
@@ -27,7 +29,8 @@ services:
     volumes:
       - .docker/mysql/dbdata:/var/lib/mysql
       - .docker/mysql/entrypoint-initdb:/docker-entrypoint-initdb.d
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --innodb-use-native-aio=0
+      - .docker/mysql/my.cnf:/etc/my.cnf
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --disable-log-bin
     ports:
       - '33006:3306'
     environment:
@@ -44,7 +47,6 @@ services:
       - .docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
     environment:
       - PHP_IDE_CONFIG=serverName=localhost
-      - XDEBUG_CONFIG=remote_host=192.168.0.4 remote_port=9000
     entrypoint: dockerize -wait tcp://mysql:3306 -timeout 40s php-fpm
     depends_on:
       - mysql
