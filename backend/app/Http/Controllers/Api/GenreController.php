@@ -10,7 +10,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class GenreController extends BasicCrudController
 {
-    protected int $perPage = 3;
+    protected int $defaultPerPage = 3;
 
     private array $rules = [
         'name' => 'required|max:255',

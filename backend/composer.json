@@ -14,9 +14,11 @@
         "fideloper/proxy": "^4.4",
         "haruncpi/laravel-log-reader": "^1.0",
         "laravel/framework": "^6.20",
+        "laravel/helpers": "^1.4",
         "laravel/tinker": "^2.5",
         "lucascudo/laravel-pt-br-localization": "^1.1",
         "superbalist/laravel-google-cloud-storage": "^2.2",
+        "tucker-eric/eloquentfilter": "^2.4",
         "waavi/sanitizer": "^1.0"
     },
     "require-dev": {

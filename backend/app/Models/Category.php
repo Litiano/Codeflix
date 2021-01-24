@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\ModelFilters\CategoryFilter;
 use App\Models\Traits\UuidModel;
+use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -32,11 +34,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Category extends UuidModel
 {
-    use SoftDeletes;
+    use SoftDeletes, Filterable;
 
     protected $fillable = ['name', 'description', 'is_active'];
 
     protected $casts = [
         'is_active' => 'bool'
     ];
+
+    public function modelFilter(): ?string
+    {
+        return $this->provideFilter(CategoryFilter::class);
+    }
 }
