@@ -1,9 +1,10 @@
 import * as React from 'react';
-import MUIDataTable, {MUIDataTableColumn} from "mui-datatables";
+import {MUIDataTableColumn} from "mui-datatables";
 import {useEffect, useState} from "react";
 import {parseISO, format} from 'date-fns';
 import castMemberHttp from "../../utils/http/cast-member-http";
 import {CastMember, ListResponse} from "../../utils/models";
+import DefaultTable from '../../components/Table';
 
 const CastMemberTypes = {
     1: 'Diretor',
@@ -57,7 +58,7 @@ const Table = (props: Props) => {
 
     return (
         <div>
-            <MUIDataTable columns={columnsDefinition} title='Listagem de membros' data={data}/>
+            <DefaultTable columns={columnsDefinition} title='Listagem de membros' data={data}/>
         </div>
     );
 };

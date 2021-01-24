@@ -1,10 +1,11 @@
 import * as React from 'react';
-import MUIDataTable, {MUIDataTableColumn} from "mui-datatables";
+import {MUIDataTableColumn} from "mui-datatables";
 import {useEffect, useState} from "react";
 import {parseISO, format} from 'date-fns';
 import categoryHttp from "../../utils/http/category-http";
 import {BadgeNo, BadgeYes} from "../../components/Badge";
 import {Category, ListResponse} from "../../utils/models";
+import DefaultTable from '../../components/Table';
 
 const columnsDefinition: MUIDataTableColumn[] = [
     {
@@ -53,7 +54,7 @@ const Table = (props: Props) => {
 
     return (
         <div>
-            <MUIDataTable columns={columnsDefinition} title='Listagem de categorias' data={data}/>
+            <DefaultTable columns={columnsDefinition} title='Listagem de categorias' data={data}/>
         </div>
     );
 };
