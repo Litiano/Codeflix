@@ -1,34 +1,22 @@
 import * as React from 'react';
+import {useEffect, useState} from 'react';
 import {
-    Box,
-    Button,
-    ButtonProps,
-    TextField,
-    Theme,
-    makeStyles,
-    Radio,
     FormControl,
-    FormLabel, RadioGroup, FormControlLabel, FormHelperText
+    FormControlLabel,
+    FormHelperText,
+    FormLabel,
+    Radio,
+    RadioGroup,
+    TextField
 } from "@material-ui/core";
 import {useForm} from "react-hook-form";
 import castMemberHttp from "../../utils/http/cast-member-http";
-import {useEffect, useState} from "react";
 import * as yup from "../../utils/vendor/yup";
 import {yupResolver} from "@hookform/resolvers/yup";
 import {useSnackbar} from "notistack";
 import {useHistory, useParams} from "react-router-dom";
 import {CastMember} from "../../utils/models";
-
-const useStyles = makeStyles((theme: Theme) => {
-    return {
-        submit: {
-            margin: theme.spacing(1),
-        },
-        type: {
-            margin: theme.spacing(1),
-        },
-    }
-});
+import SubmitActions from "../../components/SubmitActions";
 
 const validationSchema = yup.object().shape({
     name: yup.string().label('Nome').required().max(255),
@@ -36,21 +24,13 @@ const validationSchema = yup.object().shape({
 });
 
 export const Form = () => {
-    const classes = useStyles();
     const snackbar = useSnackbar();
     const history = useHistory();
     const {id} = useParams();
-    const [castMember, setCastMember] = useState<CastMember|null>(null);
+    const [castMember, setCastMember] = useState<CastMember | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
 
-    const buttonProps: ButtonProps = {
-        variant: 'contained',
-        className: classes.submit,
-        color: 'secondary',
-        disabled: loading,
-    };
-
-    const {register, handleSubmit, getValues, setValue, errors, reset, watch} = useForm({
+    const {register, handleSubmit, getValues, setValue, errors, reset, watch, trigger} = useForm({
         resolver: yupResolver(validationSchema),
         defaultValues: {
             name: '',
@@ -141,10 +121,16 @@ export const Form = () => {
                     errors.type && <FormHelperText id={'type-helper-text'}>{errors.type.message}</FormHelperText>
                 }
             </FormControl>
-            <Box dir={'rtl'}>
-                <Button {...buttonProps} onClick={() => onSubmit(getValues(), null)}>Salvar</Button>
-                <Button {...buttonProps} type={'submit'}>Salvar e continuar editando</Button>
-            </Box>
+            <SubmitActions disabledButtons={loading}
+                           handleSave={
+                               async () => {
+                                   const result = await trigger();
+                                   if (result) {
+                                       await onSubmit(getValues(), null)
+                                   }
+                               }
+                           }
+            />
         </form>
     );
 };

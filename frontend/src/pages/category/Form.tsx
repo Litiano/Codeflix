@@ -8,6 +8,7 @@ import {useEffect, useState} from "react";
 import {useParams, useHistory} from "react-router-dom";
 import {useSnackbar} from "notistack";
 import {Category} from "../../utils/models";
+import SubmitActions from "../../components/SubmitActions";
 
 const useStyles = makeStyles((theme: Theme) => {
     return {
@@ -22,21 +23,13 @@ const validationSchema = yup.object().shape({
 });
 
 export const Form = () => {
-    const classes = useStyles();
     const {id} = useParams();
     const [category, setCategory] = useState<Category | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const history = useHistory();
     const snackbar = useSnackbar();
 
-    const buttonProps: ButtonProps = {
-        color: 'secondary',
-        variant: 'contained',
-        className: classes.submit,
-        disabled: loading,
-    }
-
-    const {register, handleSubmit, getValues, setValue, errors, reset, watch} = useForm({
+    const {register, handleSubmit, getValues, setValue, errors, reset, watch, trigger} = useForm({
         resolver: yupResolver(validationSchema),
         defaultValues: {
             is_active: true,
@@ -134,14 +127,16 @@ export const Form = () => {
                     />
                 }
             />
-            <Box dir={'rtl'}>
-                <Button {...buttonProps} color={"primary"} onClick={() => onSubmit(getValues(), null)}>
-                    Salvar
-                </Button>
-                <Button {...buttonProps} type={'submit'}>
-                    Salvar e continuar editando
-                </Button>
-            </Box>
+            <SubmitActions disabledButtons={loading}
+                           handleSave={
+                               async () => {
+                                   const result = await trigger();
+                                   if (result) {
+                                       await onSubmit(getValues(), null)
+                                   }
+                               }
+                           }
+            />
         </form>
     );
 };
