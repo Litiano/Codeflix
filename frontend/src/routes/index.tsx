@@ -1,11 +1,11 @@
 import {RouteProps} from "react-router-dom"
 import Dashboard from "../pages/Dashboard";
 import CategoryList from "../pages/category/PageList";
-import CategoryCreate from "../pages/category/PageForm";
+import CategoryForm from "../pages/category/PageForm";
 import CastMemberList from "../pages/cast-member/PageList";
-import CastMemberCreate from "../pages/cast-member/PageForm";
+import CastMemberForm from "../pages/cast-member/PageForm";
 import GenresList from "../pages/genres/PageList";
-import GenresCreate from "../pages/genres/PageForm";
+import GenresForm from "../pages/genres/PageForm";
 
 export interface MyRouteProps extends RouteProps {
     name: string;
@@ -31,14 +31,14 @@ const routes: MyRouteProps[] = [
         name: 'categories.create',
         label: 'Criar categoria',
         path: '/categories/create',
-        component: CategoryCreate,
+        component: CategoryForm,
         exact: true
     },
     {
         name: 'categories.edit',
         label: 'Editar categoria',
         path: '/categories/:id/edit',
-        component: CategoryCreate,
+        component: CategoryForm,
         exact: true
     },
     ////////////////////
@@ -53,14 +53,14 @@ const routes: MyRouteProps[] = [
         name: 'cast-members.create',
         label: 'Criar membro',
         path: '/cast-members/create',
-        component: CastMemberCreate,
+        component: CastMemberForm,
         exact: true
     },
     {
         name: 'cast-members.edit',
         label: 'Editar membro',
         path: '/cast-members/:id/edit',
-        component: CastMemberCreate,
+        component: CastMemberForm,
         exact: true
     },
     ////////////////////////////////
@@ -75,14 +75,14 @@ const routes: MyRouteProps[] = [
         name: 'genres.create',
         label: 'Criar gênero',
         path: '/genres/create',
-        component: GenresCreate,
+        component: GenresForm,
         exact: true
     },
     {
         name: 'genres.edit',
         label: 'Editar gênero',
         path: '/genres/:id/edit',
-        component: GenresCreate,
+        component: GenresForm,
         exact: true
     },
 ];

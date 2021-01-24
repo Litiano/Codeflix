@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@hookform/resolvers": "^1.3.2",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/styles": "^4.10.0",
@@ -17,17 +18,20 @@
     "@types/react-dom": "^16.9.0",
     "@types/react-router-dom": "^5.1.6",
     "@types/route-parser": "^0.1.3",
+    "@types/yup": "^0.29.11",
     "axios": "^0.21.0",
     "date-fns": "^2.16.1",
     "lodash": "^4.17.20",
     "mui-datatables": "^3.7.1",
+    "notistack": "^1.0.3",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-hook-form": "^6.11.4",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.3",
     "route-parser": "^0.0.5",
-    "typescript": "~3.7.2"
+    "typescript": "~3.8.3",
+    "yup": "^0.32.8"
   },
   "scripts": {
     "start": "npm run copy-env; react-scripts start",

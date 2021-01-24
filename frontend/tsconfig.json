@@ -18,7 +18,9 @@
         "isolatedModules": true,
         "noEmit": true,
         "jsx": "react",
-        "noImplicitAny": false
+        "noImplicitAny": false,
+        //"strictNullChecks": true, //yup config
+        //"strictFunctionTypes": false //yup config
     },
     "include": [
         "src"
