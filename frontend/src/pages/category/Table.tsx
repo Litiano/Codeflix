@@ -1,12 +1,15 @@
 import * as React from 'react';
-import {MUIDataTableColumn} from "mui-datatables";
 import {useEffect, useState} from "react";
 import {parseISO, format} from 'date-fns';
 import categoryHttp from "../../utils/http/category-http";
 import {BadgeNo, BadgeYes} from "../../components/Badge";
 import {Category, ListResponse} from "../../utils/models";
-import DefaultTable, {TableColumn} from '../../components/Table';
+import DefaultTable, {makeActionStyles, TableColumn} from '../../components/Table';
 import {useSnackbar} from "notistack";
+import {MuiThemeProvider} from "@material-ui/core/styles";
+import {IconButton} from "@material-ui/core";
+import {Link} from "react-router-dom";
+import EditIcon from '@material-ui/icons/Edit';
 
 const columnsDefinition: TableColumn[] = [
     {
@@ -46,12 +49,27 @@ const columnsDefinition: TableColumn[] = [
         name: 'actions',
         label: 'Ações',
         width: '13%',
+        options: {
+            sort: false,
+            customBodyRender(value, tableMeta, updateValue): JSX.Element {
+                return (
+                    <IconButton
+                        color={'secondary'}
+                        component={Link}
+                        to={`/categories/${tableMeta.rowData[0]}/edit`}
+                    >
+                        <EditIcon/>
+                    </IconButton>
+                );
+            }
+        }
     },
 ];
 
 type Props = {
 
 };
+
 const Table = (props: Props) => {
     const snackbar = useSnackbar();
     const [data, setData] = useState<Category[]>([]);
@@ -80,14 +98,14 @@ const Table = (props: Props) => {
     }, []);
 
     return (
-        <div>
+        <MuiThemeProvider theme={makeActionStyles(columnsDefinition.length - 1)}>
             <DefaultTable
                 columns={columnsDefinition}
                 title='Listagem de categorias'
                 data={data}
                 loading={loading}
             />
-        </div>
+        </MuiThemeProvider>
     );
 };
 
