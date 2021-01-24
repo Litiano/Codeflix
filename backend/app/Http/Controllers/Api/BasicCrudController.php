@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Category;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -40,11 +39,7 @@ abstract class BasicCrudController extends Controller
         return new $resource($model);
     }
 
-    /**
-     * @param $id
-     * @return Model
-     */
-    protected function findOrFail($id)
+    protected function findOrFail($id): Model
     {
         $model = $this->model();
         $keyName = (new $model)->getRouteKeyName();

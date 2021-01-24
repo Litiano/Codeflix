@@ -17,6 +17,7 @@ import * as yup from "../../utils/vendor/yup";
 import {yupResolver} from "@hookform/resolvers/yup";
 import {useSnackbar} from "notistack";
 import {useHistory, useParams} from "react-router-dom";
+import {CastMember} from "../../utils/models";
 
 const useStyles = makeStyles((theme: Theme) => {
     return {
@@ -39,7 +40,7 @@ export const Form = () => {
     const snackbar = useSnackbar();
     const history = useHistory();
     const {id} = useParams();
-    const [castMember, setCastMember] = useState<{id: string} | null>(null);
+    const [castMember, setCastMember] = useState<CastMember|null>(null);
     const [loading, setLoading] = useState<boolean>(false);
 
     const buttonProps: ButtonProps = {
@@ -62,7 +63,7 @@ export const Form = () => {
             return;
         }
 
-        async function getCastMember() {
+        (async function getCastMember() {
             setLoading(true);
             try {
                 const {data} = await castMemberHttp.get(id);
@@ -74,8 +75,7 @@ export const Form = () => {
             } finally {
                 setLoading(false);
             }
-        }
-        getCastMember();
+        })();
     }, []);
 
     useEffect(() => {

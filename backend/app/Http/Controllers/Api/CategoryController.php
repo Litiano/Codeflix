@@ -8,7 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class CategoryController extends BasicCrudController
 {
-    private $rules = [
+    private array $rules = [
         'name' => 'required|max:255',
         'description' => 'nullable',
         'is_active' => 'boolean',

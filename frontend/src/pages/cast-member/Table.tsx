@@ -1,9 +1,9 @@
 import * as React from 'react';
 import MUIDataTable, {MUIDataTableColumn} from "mui-datatables";
 import {useEffect, useState} from "react";
-import {httpVideo} from "../../utils/http";
-import {Chip} from "@material-ui/core";
 import {parseISO, format} from 'date-fns';
+import castMemberHttp from "../../utils/http/cast-member-http";
+import {CastMember, ListResponse} from "../../utils/models";
 
 const CastMemberTypes = {
     1: 'Diretor',
@@ -39,12 +39,20 @@ type Props = {
 
 };
 const Table = (props: Props) => {
-    const [data, setData] = useState([]);
+    const [data, setData] = useState<CastMember[]>([]);
 
     useEffect(() => {
-        httpVideo.get('cast_members').then(response => {
-            setData(response.data.data);
-        })
+        let isCancelled = false;
+        (async () => {
+            const {data} = await castMemberHttp.list<ListResponse<CastMember>>();
+            if (!isCancelled) {
+                setData(data.data);
+            }
+        })();
+
+        return () => {
+            isCancelled = true;
+        }
     }, []);
 
     return (

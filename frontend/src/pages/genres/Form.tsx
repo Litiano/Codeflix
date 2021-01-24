@@ -12,13 +12,13 @@ import {
 } from "@material-ui/core";
 import {useForm} from "react-hook-form";
 import genreHttp from "../../utils/http/genre-http";
-import {watch} from "fs";
 import {useEffect, useState} from "react";
 import categoryHttp from "../../utils/http/category-http";
 import {useHistory, useParams} from "react-router-dom";
 import {useSnackbar} from "notistack";
 import * as yup from "../../utils/vendor/yup";
 import {yupResolver} from "@hookform/resolvers/yup";
+import {Category, Genre, GetResponse, ListResponse} from "../../utils/models";
 
 const useStyles = makeStyles((theme: Theme) => {
     return {
@@ -38,9 +38,9 @@ export const Form = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const history = useHistory();
     const snackbar = useSnackbar();
-    const [categories, setCategories] = useState<any[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const {id} = useParams();
-    const [genre, setGenre] = useState<{id: string} | null>(null);
+    const [genre, setGenre] = useState<Genre | null>(null);
 
     const buttonProps: ButtonProps = {
         color: 'secondary',
@@ -62,7 +62,8 @@ export const Form = () => {
     }, [register]);
 
     useEffect(() => {
-        async function loadData() {
+        let isSubscribed = true;
+        (async function loadData() {
             setLoading(true);
             const promises = [categoryHttp.list()];
             if (id) {
@@ -70,13 +71,15 @@ export const Form = () => {
             }
             try {
                 const [categoriesResponse, genreResponse] = await Promise.all(promises);
-                setCategories(categoriesResponse.data.data);
-                if (id) {
-                    setGenre(genreResponse.data.data);
-                    reset({
-                        ...genreResponse.data.data,
-                        categories_id: genreResponse.data.data.categories.map(category => category.id)
-                    });
+                if (isSubscribed) {
+                    setCategories(categoriesResponse.data.data);
+                    if (id) {
+                        setGenre(genreResponse.data.data);
+                        reset({
+                            ...genreResponse.data.data,
+                            categories_id: genreResponse.data.data.categories.map(category => category.id)
+                        });
+                    }
                 }
             } catch (error) {
                 console.error(error);
@@ -84,8 +87,11 @@ export const Form = () => {
             } finally {
                 setLoading(false);
             }
+        })();
+
+        return () => {
+            isSubscribed = false;
         }
-        loadData();
     }, []);
 
     async function onSubmit(formData, event) {
@@ -160,6 +166,7 @@ export const Form = () => {
             </TextField>
             <FormControlLabel
                 control={<Checkbox defaultChecked name="is_active" inputRef={register}/>}
+                disabled={loading}
                 label="Ativo?"
             />
             <Box dir={'rtl'}>

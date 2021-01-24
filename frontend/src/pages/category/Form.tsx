@@ -7,6 +7,7 @@ import {yupResolver} from '@hookform/resolvers/yup';
 import {useEffect, useState} from "react";
 import {useParams, useHistory} from "react-router-dom";
 import {useSnackbar} from "notistack";
+import {Category} from "../../utils/models";
 
 const useStyles = makeStyles((theme: Theme) => {
     return {
@@ -23,7 +24,7 @@ const validationSchema = yup.object().shape({
 export const Form = () => {
     const classes = useStyles();
     const {id} = useParams();
-    const [category, setCategory] = useState<{id: string} | null>(null);
+    const [category, setCategory] = useState<Category | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const history = useHistory();
     const snackbar = useSnackbar();
@@ -53,7 +54,7 @@ export const Form = () => {
             return;
         }
 
-        async function getCategory() {
+        (async function getCategory() {
             setLoading(true);
             try {
                 const {data} = await categoryHttp.get(id);
@@ -65,8 +66,7 @@ export const Form = () => {
             } finally {
                 setLoading(false);
             }
-        }
-        getCategory();
+        })();
     }, []);
 
     async function onSubmit(formData, event) {
