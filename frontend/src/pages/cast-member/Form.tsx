@@ -17,6 +17,7 @@ import {useSnackbar} from "notistack";
 import {useHistory, useParams} from "react-router-dom";
 import {CastMember} from "../../utils/models";
 import SubmitActions from "../../components/SubmitActions";
+import {DefaultForm} from "../../components/DefaultForm";
 
 const validationSchema = yup.object().shape({
     name: yup.string().label('Nome').required().max(255),
@@ -88,7 +89,7 @@ export const Form = () => {
     }
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <DefaultForm onSubmit={handleSubmit(onSubmit)} GridItemProps={{xs: 12, md: 6}}>
             <TextField
                 name={'name'}
                 label={'Nome'}
@@ -131,7 +132,7 @@ export const Form = () => {
                                }
                            }
             />
-        </form>
+        </DefaultForm>
     );
 };
 

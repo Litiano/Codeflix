@@ -1,12 +1,7 @@
 import * as React from 'react';
 import {
-    Box,
-    Button,
-    ButtonProps,
     Checkbox,
     TextField,
-    Theme,
-    makeStyles,
     FormControlLabel,
     MenuItem
 } from "@material-ui/core";
@@ -20,14 +15,7 @@ import * as yup from "../../utils/vendor/yup";
 import {yupResolver} from "@hookform/resolvers/yup";
 import {Category, Genre, GetResponse, ListResponse} from "../../utils/models";
 import SubmitActions from "../../components/SubmitActions";
-
-const useStyles = makeStyles((theme: Theme) => {
-    return {
-        submit: {
-            margin: theme.spacing(1),
-        }
-    }
-});
+import {DefaultForm} from "../../components/DefaultForm";
 
 const validationSchema = yup.object().shape({
     name: yup.string().label('Nome').required().max(255),
@@ -118,7 +106,7 @@ export const Form = () => {
     }
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <DefaultForm onSubmit={handleSubmit(onSubmit)} GridItemProps={{xs: 12, md: 6}}>
             <TextField
                 name={'name'}
                 label={'Nome'}
@@ -172,7 +160,7 @@ export const Form = () => {
                                }
                            }
             />
-        </form>
+        </DefaultForm>
     );
 };
 
