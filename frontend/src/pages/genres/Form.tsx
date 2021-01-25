@@ -46,7 +46,7 @@ export const Form = () => {
         let isSubscribed = true;
         (async function loadData() {
             setLoading(true);
-            const promises = [categoryHttp.list()];
+            const promises = [categoryHttp.list({queryOptions: {all: ''}})];
             if (id) {
                 promises.push(genreHttp.get(id));
             }
