@@ -10,6 +10,7 @@ import {MuiThemeProvider} from "@material-ui/core/styles";
 import {IconButton} from "@material-ui/core";
 import {Link} from "react-router-dom";
 import EditIcon from '@material-ui/icons/Edit';
+import {FilterResetButton} from "../../components/Table/FilterResetButton";
 
 interface Pagination {
     page: number;
@@ -88,21 +89,22 @@ type Props = {
 };
 
 const Table = (props: Props) => {
-    const snackbar = useSnackbar();
-    const [data, setData] = useState<Category[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [searchState, setSearchState] = useState<SearchState>({
+    const initialState = {
         search: '',
-        pagination: {
-            page: 1,
+            pagination: {
+        page: 1,
             total: 0,
             per_page: 10
         },
         order: {
             sort: null,
-            dir: null,
+                dir: null,
         }
-    });
+    }
+    const snackbar = useSnackbar();
+    const [data, setData] = useState<Category[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [searchState, setSearchState] = useState<SearchState>(initialState);
     const subscribed = useRef(true);
 
     const columns = columnsDefinition.map((column) => {
@@ -172,9 +174,18 @@ const Table = (props: Props) => {
                     rowsPerPage: searchState.pagination.per_page,
                     count: searchState.pagination.total,
                     serverSide: true,
+                    customToolbar: () => (
+                        <FilterResetButton handleClick={() => {
+                            setSearchState(initialState);
+                        }}/>
+                    ),
                     onSearchChange: (value) => setSearchState((prevState => ({
                         ...prevState,
-                        search: value || ''
+                        search: value || '',
+                        pagination: {
+                            ...prevState.pagination,
+                            page: 1
+                        }
                     }))),
                     onChangePage: (page) => setSearchState((prevState => ({
                         ...prevState,
@@ -197,7 +208,6 @@ const Table = (props: Props) => {
                             sort: changedColumn,
                         }
                     }))),
-
                 }}
             />
         </MuiThemeProvider>
