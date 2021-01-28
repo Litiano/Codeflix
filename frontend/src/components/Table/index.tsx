@@ -45,7 +45,7 @@ const defaultOptions: MUIDataTableOptions = {
             title: 'Ver Colunas',
             titleAria: 'Ver/Esconder colunas da Tabela',
         },
-    }
+    },
 };
 
 interface TableProps extends MUIDataTableProps {

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useReducer, useRef, useState} from "react";
 import {parseISO, format} from 'date-fns';
 import categoryHttp from "../../utils/http/category-http";
 import {BadgeNo, BadgeYes} from "../../components/Badge";
@@ -11,6 +11,7 @@ import {IconButton} from "@material-ui/core";
 import {Link} from "react-router-dom";
 import EditIcon from '@material-ui/icons/Edit';
 import {FilterResetButton} from "../../components/Table/FilterResetButton";
+import {debounce} from "lodash";
 
 interface Pagination {
     page: number;
@@ -42,6 +43,7 @@ const columnsDefinition: TableColumn[] = [
         name: 'name',
         label: 'Nome',
         width: '43%',
+        options: {},
     },
     {
         name: 'is_active',
@@ -88,28 +90,69 @@ type Props = {
 
 };
 
-const Table = (props: Props) => {
-    const initialState = {
-        search: '',
-            pagination: {
+const INITIAL_STATE = {
+    search: '',
+    pagination: {
         page: 1,
-            total: 0,
-            per_page: 10
-        },
-        order: {
-            sort: null,
-                dir: null,
-        }
+        total: 0,
+        per_page: 10
+    },
+    order: {
+        sort: null,
+        dir: null,
     }
+}
+
+function reducer(prevState, action) {
+    switch (action.type) {
+        case 'search':
+            return {
+                ...prevState,
+                search: action.search || '',
+                pagination: {
+                    ...prevState.pagination,
+                    page: 1
+                }
+            }
+        case 'page':
+            return {
+                ...prevState,
+                pagination: {
+                    ...prevState.pagination,
+                    page: action.page
+                }
+            }
+        case 'per_page':
+            return {
+                ...prevState,
+                pagination: {
+                    ...prevState.pagination,
+                    per_page: action.per_page
+                }
+            }
+        case 'order':
+            return {
+                ...prevState,
+                order: {
+                    dir: action.dir,
+                    sort: action.sort,
+                }
+            }
+        default:
+            return INITIAL_STATE;
+    }
+}
+
+const Table = (props: Props) => {
     const snackbar = useSnackbar();
     const [data, setData] = useState<Category[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
-    const [searchState, setSearchState] = useState<SearchState>(initialState);
+    const [searchState, dispatchSearchState] = useReducer(reducer, INITIAL_STATE);
     const subscribed = useRef(true);
 
     const columns = columnsDefinition.map((column) => {
-        if (column.name === searchState.order.sort) {
-            (column.options as any).sortDirection = searchState.order.dir;
+        if (column.name === searchState.order.sort && column.options) {
+            column.options.sortDirection = searchState.order.dir;
         }
         return column;
     });
@@ -128,9 +171,14 @@ const Table = (props: Props) => {
         searchState.order,
     ]);
 
+    const debounceHandleOnSearchChange = debounce(dispatchSearchState, 500);
+
     async function getData() {
         setLoading(true);
         try {
+            if (!subscribed.current) {
+                return;
+            }
             const {data} = await categoryHttp.list<ListResponse<Category>>({
                 queryOptions: {
                     search: searchState.search,
@@ -140,16 +188,14 @@ const Table = (props: Props) => {
                     dir: searchState.order.dir,
                 }
             });
-            if (subscribed.current) {
-                setData(data.data);
-                setSearchState((prevState => ({
-                    ...prevState,
-                    pagination: {
-                        ...prevState.pagination,
-                        total: data.meta.total,
-                    }
-                })))
-            }
+            setData(data.data);
+            // setSearchState((prevState => ({
+            //     ...prevState,
+            //     pagination: {
+            //         ...prevState.pagination,
+            //         total: data.meta.total,
+            //     }
+            // })));
         } catch (error) {
             if (categoryHttp.isCancelRequest(error)) {
                 return;
@@ -175,39 +221,13 @@ const Table = (props: Props) => {
                     count: searchState.pagination.total,
                     serverSide: true,
                     customToolbar: () => (
-                        <FilterResetButton handleClick={() => {
-                            setSearchState(initialState);
-                        }}/>
+                        <FilterResetButton handleClick={() => dispatchSearchState({})}/>
                     ),
-                    onSearchChange: (value) => setSearchState((prevState => ({
-                        ...prevState,
-                        search: value || '',
-                        pagination: {
-                            ...prevState.pagination,
-                            page: 1
-                        }
-                    }))),
-                    onChangePage: (page) => setSearchState((prevState => ({
-                        ...prevState,
-                        pagination: {
-                            ...prevState.pagination,
-                            page: page + 1
-                        }
-                    }))),
-                    onChangeRowsPerPage: (perPage) => setSearchState((prevState => ({
-                        ...prevState,
-                        pagination: {
-                            ...prevState.pagination,
-                            per_page: perPage
-                        }
-                    }))),
-                    onColumnSortChange: (changedColumn, direction) => setSearchState((prevState => ({
-                        ...prevState,
-                        order: {
-                            dir: direction,
-                            sort: changedColumn,
-                        }
-                    }))),
+                    onSearchChange: (value) => debounceHandleOnSearchChange({type: 'search', search: value || ''}),
+                    onChangePage: (page) => dispatchSearchState({type: 'page', page: page + 1}),
+                    onChangeRowsPerPage: (perPage) => dispatchSearchState({type: 'per_page', per_page: perPage}),
+                    onColumnSortChange: (changedColumn, direction) =>
+                        dispatchSearchState({type: 'order', dir: direction, sort: changedColumn}),
                 }}
             />
         </MuiThemeProvider>
