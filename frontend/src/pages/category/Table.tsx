@@ -12,24 +12,8 @@ import {Link} from "react-router-dom";
 import EditIcon from '@material-ui/icons/Edit';
 import {FilterResetButton} from "../../components/Table/FilterResetButton";
 import {debounce} from "lodash";
+import reducer, {INITIAL_STATE, Creators} from "../../store/search";
 
-interface Pagination {
-    page: number;
-    total: number;
-    per_page: number;
-
-}
-
-interface Order {
-    sort: string | null;
-    dir: string | null;
-}
-
-interface SearchState {
-    search: string;
-    pagination: Pagination;
-    order: Order;
-}
 const columnsDefinition: TableColumn[] = [
     {
         name: 'id',
@@ -89,59 +73,6 @@ const columnsDefinition: TableColumn[] = [
 type Props = {
 
 };
-
-const INITIAL_STATE = {
-    search: '',
-    pagination: {
-        page: 1,
-        total: 0,
-        per_page: 10
-    },
-    order: {
-        sort: null,
-        dir: null,
-    }
-}
-
-function reducer(prevState, action) {
-    switch (action.type) {
-        case 'search':
-            return {
-                ...prevState,
-                search: action.search || '',
-                pagination: {
-                    ...prevState.pagination,
-                    page: 1
-                }
-            }
-        case 'page':
-            return {
-                ...prevState,
-                pagination: {
-                    ...prevState.pagination,
-                    page: action.page
-                }
-            }
-        case 'per_page':
-            return {
-                ...prevState,
-                pagination: {
-                    ...prevState.pagination,
-                    per_page: action.per_page
-                }
-            }
-        case 'order':
-            return {
-                ...prevState,
-                order: {
-                    dir: action.dir,
-                    sort: action.sort,
-                }
-            }
-        default:
-            return INITIAL_STATE;
-    }
-}
 
 const Table = (props: Props) => {
     const snackbar = useSnackbar();
@@ -215,23 +146,26 @@ const Table = (props: Props) => {
                 data={data}
                 loading={loading}
                 options={{
-                    searchText: searchState.search,
+                    searchText: searchState.search as any,
                     page: searchState.pagination.page - 1,
                     rowsPerPage: searchState.pagination.per_page,
                     count: searchState.pagination.total,
                     serverSide: true,
                     customToolbar: () => (
-                        <FilterResetButton handleClick={() => dispatchSearchState({})}/>
+                        <FilterResetButton handleClick={() => {
+                            //dispatchSearchState({})
+                        }}/>
                     ),
-                    onSearchChange: (value) => debounceHandleOnSearchChange({type: 'search', search: value || ''}),
-                    onChangePage: (page) => dispatchSearchState({type: 'page', page: page + 1}),
-                    onChangeRowsPerPage: (perPage) => dispatchSearchState({type: 'per_page', per_page: perPage}),
-                    onColumnSortChange: (changedColumn, direction) =>
-                        dispatchSearchState({type: 'order', dir: direction, sort: changedColumn}),
+                    onSearchChange: (value) => debounceHandleOnSearchChange(Creators.setSearch({search: value || ''})),
+                    onChangePage: (page) => dispatchSearchState(Creators.setPage({page: page + 1})),
+                    onChangeRowsPerPage: (perPage) => dispatchSearchState(Creators.setPerPage({per_page: perPage})),
+                    onColumnSortChange: (changedColumn, direction) => {
+                        dispatchSearchState(Creators.setOrder({sort: changedColumn, dir: direction}));
+                    }
                 }}
             />
         </MuiThemeProvider>
     );
-};
+}
 
 export default Table;

@@ -3,7 +3,7 @@ import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Link, { LinkProps } from '@material-ui/core/Link';
 import Typography from '@material-ui/core/Typography';
 import MuiBreadcrumbs from '@material-ui/core/Breadcrumbs';
-import { Route, MemoryRouter } from 'react-router';
+import { Route } from 'react-router';
 import { Link as RouterLink } from 'react-router-dom';
 import {Location} from 'history';
 import routes from "../routes";

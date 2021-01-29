@@ -13,7 +13,7 @@ import {useHistory, useParams} from "react-router-dom";
 import {useSnackbar} from "notistack";
 import * as yup from "../../utils/vendor/yup";
 import {yupResolver} from "@hookform/resolvers/yup";
-import {Category, Genre, GetResponse, ListResponse} from "../../utils/models";
+import {Category, Genre} from "../../utils/models";
 import SubmitActions from "../../components/SubmitActions";
 import {DefaultForm} from "../../components/DefaultForm";
 
@@ -28,7 +28,7 @@ export const Form = () => {
     const snackbar = useSnackbar();
     const [categories, setCategories] = useState<Category[]>([]);
     const {id} = useParams();
-    const [genre, setGenre] = useState<Genre | null>(null);
+    const [, setGenre] = useState<Genre | null>(null);
 
     const {register, handleSubmit, getValues, setValue, errors, reset, watch, trigger} = useForm({
         resolver: yupResolver(validationSchema),

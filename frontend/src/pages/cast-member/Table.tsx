@@ -1,5 +1,4 @@
 import * as React from 'react';
-import {MUIDataTableColumn} from "mui-datatables";
 import {useEffect, useState} from "react";
 import {parseISO, format} from 'date-fns';
 import castMemberHttp from "../../utils/http/cast-member-http";

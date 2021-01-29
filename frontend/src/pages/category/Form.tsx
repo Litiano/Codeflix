@@ -21,7 +21,7 @@ const validationSchema = yup.object().shape({
 
 export const Form = () => {
     const {id} = useParams();
-    const [category, setCategory] = useState<Category | null>(null);
+    const [, setCategory] = useState<Category | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const history = useHistory();
     const snackbar = useSnackbar();
