@@ -10,7 +10,7 @@ abstract class DefaultModelFilter extends ModelFilter
 {
     protected array $sortable = [];
 
-    public function setup()
+    public function setup(): void
     {
         $this->blacklistMethod('isSortable');
         $noSort = !$this->input('sort');
@@ -19,7 +19,7 @@ abstract class DefaultModelFilter extends ModelFilter
         }
     }
 
-    public function sort(string $column)
+    public function sort(string $column): void
     {
         if (method_exists($this, $method = 'sortBy' . Str::studly($column))) {
             $this->{$method}();

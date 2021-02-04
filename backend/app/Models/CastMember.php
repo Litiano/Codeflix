@@ -3,7 +3,9 @@
 namespace App\Models;
 
 
+use App\ModelFilters\CastMemberFilter;
 use App\Models\Traits\UuidModel;
+use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -31,10 +33,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class CastMember extends UuidModel
 {
-    use SoftDeletes;
+    use SoftDeletes, Filterable;
 
     public const TYPE_DIRECTOR = 1;
     public const TYPE_ACTOR = 2;
 
+    public static array $types = [
+        self::TYPE_DIRECTOR,
+        self::TYPE_ACTOR,
+    ];
+
     protected $fillable = ['name', 'type'];
+
+
+    public function modelFilter(): ?string
+    {
+        return $this->provideFilter(CastMemberFilter::class);
+    }
 }

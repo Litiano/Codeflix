@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\ModelFilters\GenreFilter;
 use App\Models\Traits\UuidModel;
+use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -33,7 +35,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Genre extends UuidModel
 {
-    use SoftDeletes;
+    use SoftDeletes, Filterable;
 
     protected $fillable = ['name', 'is_active'];
 
@@ -44,5 +46,10 @@ class Genre extends UuidModel
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class);
+    }
+
+    public function modelFilter(): ?string
+    {
+        return $this->provideFilter(GenreFilter::class);
     }
 }
