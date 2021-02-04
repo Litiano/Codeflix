@@ -32,7 +32,9 @@
     "redux": "^4.0.5",
     "reduxsauce": "^1.2.0",
     "route-parser": "^0.0.5",
+    "serve": "^11.3.2",
     "typescript": "~3.8.3",
+    "use-debounce": "^5.2.0",
     "yup": "^0.32.8"
   },
   "scripts": {
@@ -40,7 +42,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "copy-env": "[ ! -f .env ] && cp .env.example .env || exit 0"
+    "copy-env": "[ ! -f .env ] && cp .env.example .env || exit 0",
+    "serve-prod": "npm run copy-env; serve -s build"
   },
   "eslintConfig": {
     "extends": "react-app"

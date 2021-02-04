@@ -1,18 +1,17 @@
 import * as React from 'react';
-import {useEffect, useReducer, useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {parseISO, format} from 'date-fns';
 import categoryHttp from "../../utils/http/category-http";
 import {BadgeNo, BadgeYes} from "../../components/Badge";
 import {Category, ListResponse} from "../../utils/models";
-import DefaultTable, {makeActionStyles, TableColumn} from '../../components/Table';
+import DefaultTable, {makeActionStyles, TableColumn, MuiDataTableRefComponent} from '../../components/Table';
 import {useSnackbar} from "notistack";
 import {MuiThemeProvider} from "@material-ui/core/styles";
 import {IconButton} from "@material-ui/core";
 import {Link} from "react-router-dom";
 import EditIcon from '@material-ui/icons/Edit';
 import {FilterResetButton} from "../../components/Table/FilterResetButton";
-import {debounce} from "lodash";
-import reducer, {INITIAL_STATE, Creators} from "../../store/search";
+import useFilter from "../../hooks/useFilter";
 
 const columnsDefinition: TableColumn[] = [
     {
@@ -74,35 +73,47 @@ type Props = {
 
 };
 
+const rowsPerPage = 15;
+const rowsPerPageOptions = [15, 25, 50];
+const debounceTime = 500;
+
 const Table = (props: Props) => {
     const snackbar = useSnackbar();
+    const subscribed = useRef(true);
     const [data, setData] = useState<Category[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
-    const [searchState, dispatchSearchState] = useReducer(reducer, INITIAL_STATE);
-    const subscribed = useRef(true);
+    const tableRef = useRef() as React.MutableRefObject<MuiDataTableRefComponent>
 
-    const columns = columnsDefinition.map((column) => {
-        if (column.name === searchState.order.sort && column.options) {
-            column.options.sortDirection = searchState.order.dir;
-        }
-        return column;
+    const {
+        columns,
+        filterManager,
+        filterState,
+        debouncedFilterState,
+        totalRecords,
+        setTotalRecords
+    } = useFilter({
+        columns: columnsDefinition,
+        debounceTime: debounceTime,
+        rowsPerPage: rowsPerPage,
+        rowsPerPageOptions: rowsPerPageOptions,
+        tableRef: tableRef,
     });
 
     useEffect(() => {
         subscribed.current = true;
+        filterManager.pushHistory();
         getData();
 
         return () => {
             subscribed.current = false;
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
-        searchState.search,
-        searchState.pagination.page,
-        searchState.pagination.per_page,
-        searchState.order,
+        filterManager.cleanSearchText(debouncedFilterState.search), // eslint-disable-line react-hooks/exhaustive-deps
+        debouncedFilterState.pagination.page,
+        debouncedFilterState.pagination.per_page,
+        debouncedFilterState.order,
     ]);
-
-    const debounceHandleOnSearchChange = debounce(dispatchSearchState, 500);
 
     async function getData() {
         setLoading(true);
@@ -112,21 +123,15 @@ const Table = (props: Props) => {
             }
             const {data} = await categoryHttp.list<ListResponse<Category>>({
                 queryOptions: {
-                    search: searchState.search,
-                    page: searchState.pagination.page,
-                    per_page: searchState.pagination.per_page,
-                    sort: searchState.order.sort,
-                    dir: searchState.order.dir,
+                    search: filterManager.cleanSearchText(filterState.search),
+                    page: filterState.pagination.page,
+                    per_page: filterState.pagination.per_page,
+                    sort: filterState.order.sort,
+                    dir: filterState.order.dir,
                 }
             });
             setData(data.data);
-            // setSearchState((prevState => ({
-            //     ...prevState,
-            //     pagination: {
-            //         ...prevState.pagination,
-            //         total: data.meta.total,
-            //     }
-            // })));
+            setTotalRecords(data.meta.total);
         } catch (error) {
             if (categoryHttp.isCancelRequest(error)) {
                 return;
@@ -145,23 +150,21 @@ const Table = (props: Props) => {
                 title='Listagem de categorias'
                 data={data}
                 loading={loading}
+                ref={tableRef}
                 options={{
-                    searchText: searchState.search as any,
-                    page: searchState.pagination.page - 1,
-                    rowsPerPage: searchState.pagination.per_page,
-                    count: searchState.pagination.total,
+                    searchText: filterState.search as any,
+                    page: filterState.pagination.page - 1,
+                    rowsPerPage: filterState.pagination.per_page,
+                    rowsPerPageOptions: filterManager.rowsPerPageOptions,
+                    count: totalRecords,
                     serverSide: true,
                     customToolbar: () => (
-                        <FilterResetButton handleClick={() => {
-                            //dispatchSearchState({})
-                        }}/>
+                        <FilterResetButton handleClick={() => filterManager.resetFilter()}/>
                     ),
-                    onSearchChange: (value) => debounceHandleOnSearchChange(Creators.setSearch({search: value || ''})),
-                    onChangePage: (page) => dispatchSearchState(Creators.setPage({page: page + 1})),
-                    onChangeRowsPerPage: (perPage) => dispatchSearchState(Creators.setPerPage({per_page: perPage})),
-                    onColumnSortChange: (changedColumn, direction) => {
-                        dispatchSearchState(Creators.setOrder({sort: changedColumn, dir: direction}));
-                    }
+                    onSearchChange: (value) => filterManager.changeSearch(value),
+                    onChangePage: (page) => filterManager.changePage(page),
+                    onChangeRowsPerPage: (perPage) => filterManager.changeRowsPerPage(perPage),
+                    onColumnSortChange: (changedColumn, direction) => filterManager.changeColumnSort(changedColumn, direction)
                 }}
             />
         </MuiThemeProvider>

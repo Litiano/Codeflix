@@ -4,6 +4,7 @@ import MUIDataTable, {MUIDataTableColumn, MUIDataTableOptions, MUIDataTableProps
 import {merge, omit, cloneDeep} from 'lodash';
 import {MuiThemeProvider, useMediaQuery, useTheme} from "@material-ui/core";
 import {Theme} from "@material-ui/core/styles";
+import {RefAttributes} from "react";
 
 export interface TableColumn extends MUIDataTableColumn {
     width?: string
@@ -48,12 +49,18 @@ const defaultOptions: MUIDataTableOptions = {
     },
 };
 
-interface TableProps extends MUIDataTableProps {
-    columns: TableColumn[],
-    loading?: boolean,
+export interface MuiDataTableRefComponent {
+    changePage: (page: number) => void;
+    changeRowsPerPage: (rowsPerPage: number) => void;
 }
 
-const Table: React.FC<TableProps> = (props) => {
+interface TableProps extends MUIDataTableProps, RefAttributes<MuiDataTableRefComponent> {
+    columns: TableColumn[];
+    loading?: boolean;
+    debouncedSearchTime?: number;
+}
+
+const Table = React.forwardRef<MuiDataTableRefComponent, TableProps>((props, ref) => {
 
     function extractMuiDataTableColumns(columns: TableColumn[]): MUIDataTableColumn[] {
         setColumnsWidth(columns);
@@ -77,7 +84,10 @@ const Table: React.FC<TableProps> = (props) => {
     }
 
     function getOriginalMuiDataTableProps() {
-        return omit(newProps, 'loading');
+        return {
+            ...omit(newProps, 'loading'),
+            ref
+        };
     }
 
     function applyResponsive() {
@@ -102,7 +112,7 @@ const Table: React.FC<TableProps> = (props) => {
             <MUIDataTable {...originalProps}/>
         </MuiThemeProvider>
     );
-};
+});
 
 export default Table;
 

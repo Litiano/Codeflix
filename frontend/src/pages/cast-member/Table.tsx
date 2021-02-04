@@ -95,6 +95,7 @@ const Table = (props: Props) => {
         return () => {
             isCancelled = true;
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

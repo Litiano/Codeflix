@@ -1,4 +1,12 @@
-import {Actions, SetOrderAction, SetPageAction, SetPerPageAction, SetSearchAction, State} from "./types";
+import {
+    FilterActions,
+    SetOrderAction,
+    SetPageAction,
+    SetPerPageAction,
+    SetSearchAction,
+    FilterState,
+    SetResetAction, UpdateExtraFilterAction
+} from "./types";
 import {createActions, createReducer} from 'reduxsauce';
 
 export const {Types, Creators} = createActions<{
@@ -6,24 +14,29 @@ export const {Types, Creators} = createActions<{
     SET_PAGE: string,
     SET_PER_PAGE: string,
     SET_ORDER: string,
+    SET_RESET: string,
+    UPDATE_EXTRA_FILTER: string,
 }, {
     setSearch(payload: SetSearchAction['payload']): SetSearchAction,
     setPage(payload: SetPageAction['payload']): SetPageAction,
     setPerPage(payload: SetPerPageAction['payload']): SetPerPageAction,
     setOrder(payload: SetOrderAction['payload']): SetOrderAction,
+    setReset(payload: SetResetAction['payload']): SetResetAction,
+    updateExtraFilter(payload: UpdateExtraFilterAction): UpdateExtraFilterAction,
 }>({
     setSearch: ['payload'],
     setPage: ['payload'],
     setPerPage: ['payload'],
     setOrder: ['payload'],
+    setReset: ['payload'],
+    updateExtraFilter: ['payload'],
 });
 
-export const INITIAL_STATE: State = {
+export const INITIAL_STATE: FilterState = {
     search: '',
     pagination: {
         page: 1,
-        total: 0,
-        per_page: 10
+        per_page: 15,
     },
     order: {
         sort: null,
@@ -31,15 +44,17 @@ export const INITIAL_STATE: State = {
     }
 }
 
-const reducer = createReducer<State, Actions>(INITIAL_STATE, {
+const reducer = createReducer<FilterState, FilterActions>(INITIAL_STATE, {
     [Types.SET_SEARCH]: setSearch,
     [Types.SET_PAGE]: setPage,
     [Types.SET_PER_PAGE]: setPerPage,
     [Types.SET_ORDER]: setOrder,
+    [Types.SET_RESET]: setReset,
+    [Types.UPDATE_EXTRA_FILTER]: updateExtraFilter,
 });
 export default reducer;
 
-function setSearch(state = INITIAL_STATE, action: SetSearchAction): State {
+function setSearch(state = INITIAL_STATE, action: SetSearchAction): FilterState {
     return {
         ...state,
         search: action.payload.search || '',
@@ -50,7 +65,7 @@ function setSearch(state = INITIAL_STATE, action: SetSearchAction): State {
     }
 }
 
-function setPage(state = INITIAL_STATE, action: SetPageAction): State {
+function setPage(state = INITIAL_STATE, action: SetPageAction): FilterState {
     return {
         ...state,
         pagination: {
@@ -60,7 +75,7 @@ function setPage(state = INITIAL_STATE, action: SetPageAction): State {
     }
 }
 
-function setPerPage(state = INITIAL_STATE, action: SetPerPageAction): State {
+function setPerPage(state = INITIAL_STATE, action: SetPerPageAction): FilterState {
     return {
         ...state,
         pagination: {
@@ -70,12 +85,26 @@ function setPerPage(state = INITIAL_STATE, action: SetPerPageAction): State {
     }
 }
 
-function setOrder(state = INITIAL_STATE, action: SetOrderAction): State {
+function setOrder(state = INITIAL_STATE, action: SetOrderAction): FilterState {
     return {
         ...state,
         order: {
             dir: action.payload.dir,
             sort: action.payload.sort,
+        }
+    }
+}
+
+function setReset(state = INITIAL_STATE, action: SetResetAction): FilterState {
+    return action.payload.state;
+}
+
+function updateExtraFilter(state = INITIAL_STATE, action: UpdateExtraFilterAction): FilterState {
+    return {
+        ...state,
+        extraFilter: {
+            ...state.extraFilter,
+            ...action.payload,
         }
     }
 }
