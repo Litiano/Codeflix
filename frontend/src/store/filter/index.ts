@@ -22,7 +22,7 @@ export const {Types, Creators} = createActions<{
     setPerPage(payload: SetPerPageAction['payload']): SetPerPageAction,
     setOrder(payload: SetOrderAction['payload']): SetOrderAction,
     setReset(payload: SetResetAction['payload']): SetResetAction,
-    updateExtraFilter(payload: UpdateExtraFilterAction): UpdateExtraFilterAction,
+    updateExtraFilter(payload: UpdateExtraFilterAction['payload']): UpdateExtraFilterAction,
 }>({
     setSearch: ['payload'],
     setPage: ['payload'],

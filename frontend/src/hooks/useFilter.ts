@@ -188,7 +188,8 @@ export class FilterManager {
             ...(search && search !== '' && {search: search}),
             ...(page !== 1 && {page: page}),
             ...(order.sort && order),
-            ...(perPage !== this.rowsPerPage && {per_page: perPage})
+            ...(perPage !== this.rowsPerPage && {per_page: perPage}),
+            ...(this.extraFilter && this.extraFilter.formatSearchParams(this.debouncedState)),
         }
     }
 
@@ -240,6 +241,11 @@ export class FilterManager {
                     .transform(value => !value || ['asc', 'desc'].includes(value.toLowerCase()) ? undefined : value)
                     .default(null),
             }),
+            ...(
+                this.extraFilter && {
+                    extraFilter: this.extraFilter.createValidationSchema()
+                }
+            )
         });
     }
 }

@@ -19,6 +19,7 @@ const columnsDefinition: TableColumn[] = [
         label: 'ID',
         options: {
             sort: false,
+            filter: false,
         },
         width: '30%',
     },
@@ -26,7 +27,9 @@ const columnsDefinition: TableColumn[] = [
         name: 'name',
         label: 'Nome',
         width: '43%',
-        options: {},
+        options: {
+            filter: false,
+        },
     },
     {
         name: 'is_active',
@@ -45,6 +48,7 @@ const columnsDefinition: TableColumn[] = [
             customBodyRender(value, tableMeta, updateValue): JSX.Element {
                 return <span>{format(parseISO(value), 'dd/MM/yyyy')}</span>
             },
+            filter: false,
         },
         width: '10%',
     },
@@ -54,6 +58,7 @@ const columnsDefinition: TableColumn[] = [
         width: '13%',
         options: {
             sort: false,
+            filter: false,
             customBodyRender(value, tableMeta, updateValue): JSX.Element {
                 return (
                     <IconButton
