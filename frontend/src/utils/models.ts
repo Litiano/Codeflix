@@ -50,6 +50,65 @@ export interface CastMember extends Timestamps, SoftDeletes {
     type: number;
 }
 
+interface GenreVideo extends Omit<Genre, 'categories'> {
+
+}
+
+export const VideoFileFieldMap = {
+    'video_file': 'Principal',
+    'thumb_file': 'Thumbnail',
+    'trailer_file': 'Trailer',
+    'banner_file': 'Banner',
+}
+
+interface VideoRating {
+    color: string;
+    value: string;
+}
+export const videoRatings: VideoRating[] = [
+    {
+        color: '#398549',
+        value: 'L',
+    },
+    {
+        color: '#20A3D4',
+        value: '10',
+    },
+    {
+        color: '#E79738',
+        value: '12',
+    },
+    {
+        color: '#E35E00',
+        value: '14',
+    },
+    {
+        color: '#D00003',
+        value: '16',
+    },
+    {
+        color: '#000000',
+        value: '18',
+    },
+];
+
+export interface Video extends Timestamps, SoftDeletes {
+    readonly id: string;
+    title: string;
+    description: string;
+    year_launched: number;
+    opened: boolean;
+    rating: 'L' | '10' | '12' | '14' | '16' | '18';
+    duration: number;
+    cast_members: CastMember[];
+    genres: GenreVideo[];
+    categories: Category[];
+    video_file_url: string;
+    thumb_file_url: string;
+    trailer_file_url: string;
+    banner_file_url: string;
+}
+
 export const CastMemberTypeMap = {
     1: 'Diretor',
     2: 'Ator',

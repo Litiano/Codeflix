@@ -174,12 +174,13 @@ const Table = (props: Props) => {
         return () => {
             subscribed.current = false;
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
-        filterManager.cleanSearchText(debouncedFilterState.search),
+        filterManager.cleanSearchText(debouncedFilterState.search), // eslint-disable-line react-hooks/exhaustive-deps
         debouncedFilterState.pagination.page,
         debouncedFilterState.pagination.per_page,
         debouncedFilterState.order,
-        JSON.stringify(debouncedFilterState.extraFilter),
+        JSON.stringify(debouncedFilterState.extraFilter), // eslint-disable-line react-hooks/exhaustive-deps
     ]);
 
     useEffect(() => {
@@ -196,7 +197,7 @@ const Table = (props: Props) => {
                 snackbar.enqueueSnackbar('Não foi possível carregar as informações', {variant: 'error'})
             }
         })();
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function getData() {
         setLoading(true);

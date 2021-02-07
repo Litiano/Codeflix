@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import {Page} from "../../components/Page";
 import {Form} from "./Form";
@@ -8,7 +7,7 @@ const PageForm = () => {
     const {id} = useParams();
 
     return (
-        <Page title={id ? 'Editar membro de elenco' : 'Criar membro de elenco'}>
+        <Page title={id ? 'Editar vídeo' : 'Criar video'}>
             <Form/>
         </Page>
     );

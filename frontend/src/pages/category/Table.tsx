@@ -3,7 +3,7 @@ import {useEffect, useRef, useState} from "react";
 import {parseISO, format} from 'date-fns';
 import categoryHttp from "../../utils/http/category-http";
 import {BadgeNo, BadgeYes} from "../../components/Badge";
-import {CastMemberTypeMap, Category, ListResponse, YesNoTypeMap} from "../../utils/models";
+import {Category, ListResponse, YesNoTypeMap} from "../../utils/models";
 import DefaultTable, {makeActionStyles, TableColumn, MuiDataTableRefComponent} from '../../components/Table';
 import {useSnackbar} from "notistack";
 import {MuiThemeProvider} from "@material-ui/core/styles";
@@ -154,7 +154,7 @@ const Table = (props: Props) => {
         debouncedFilterState.pagination.page,
         debouncedFilterState.pagination.per_page,
         debouncedFilterState.order,
-        JSON.stringify(debouncedFilterState.extraFilter),
+        JSON.stringify(debouncedFilterState.extraFilter), // eslint-disable-line react-hooks/exhaustive-deps
     ]);
 
     async function getData() {
