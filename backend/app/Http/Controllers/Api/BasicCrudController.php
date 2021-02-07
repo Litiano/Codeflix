@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Http\Response;
 
 abstract class BasicCrudController extends Controller
 {
@@ -74,7 +75,7 @@ abstract class BasicCrudController extends Controller
         return new $resource($model);
     }
 
-    public function destroy($id)
+    public function destroy($id): Response
     {
         $model = $this->findOrFail($id);
         $model->delete();

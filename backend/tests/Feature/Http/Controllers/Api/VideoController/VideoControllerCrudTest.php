@@ -47,6 +47,16 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
                 'updated_at',
                 'deleted_at',
             ]
+        ],
+        'cast_members' => [
+            '*' => [
+                'id',
+                'name',
+                'type',
+                'created_at',
+                'updated_at',
+                'deleted_at',
+            ]
         ]
     ];
 
@@ -91,6 +101,7 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
             'duration' => '',
             'categories_id' => '',
             'genres_id' => '',
+            'cast_members_id' => '',
         ];
         $this->assertInvalidationStoreAction($data, 'required');
         $this->assertInvalidationUpdateAction($data, 'required');
@@ -168,7 +179,7 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
 
     public function testSaveWithoutFiles()
     {
-        $testData = Arr::except($this->sendData, ['genres_id', 'categories_id']);
+        $testData = Arr::except($this->sendData, ['genres_id', 'categories_id', 'cast_members_id']);
         $data = [
             [
                 'send_data' => $this->sendData,

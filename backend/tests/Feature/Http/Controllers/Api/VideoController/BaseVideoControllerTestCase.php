@@ -4,6 +4,7 @@
 namespace Tests\Feature\Http\Controllers\Api\VideoController;
 
 
+use App\Models\CastMember;
 use App\Models\Category;
 use App\Models\Genre;
 use App\Models\Video;
@@ -29,6 +30,7 @@ abstract class BaseVideoControllerTestCase extends TestCase
         $this->video = factory(Video::class)->create(['opened' => false]);
         $category = factory(Category::class)->create();
         $genre = factory(Genre::class)->create();
+        $castMember = factory(CastMember::class)->create();
         $genre->categories()->sync($category);
         $this->sendData = [
             'title' => 'title',
@@ -38,6 +40,7 @@ abstract class BaseVideoControllerTestCase extends TestCase
             'duration' => 90,
             'genres_id' => [$genre->id],
             'categories_id' => [$category->id],
+            'cast_members_id' => [$castMember->id],
         ];
     }
 

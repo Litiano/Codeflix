@@ -97,7 +97,6 @@ class Video extends UuidModel
         $files = self::extractFiles($attributes);
         try {
             \DB::beginTransaction();
-            /** @var self $obj */
             $obj = static::query()->create($attributes);
             static::handleRelations($obj, $attributes);
             $obj->uploadFiles($files);
@@ -136,12 +135,17 @@ class Video extends UuidModel
 
     public function categories(): BelongsToMany
     {
-        return $this->belongsToMany(Category::class);
+        return $this->belongsToMany(Category::class)->withTrashed();
     }
 
     public function genres(): BelongsToMany
     {
-        return $this->belongsToMany(Genre::class);
+        return $this->belongsToMany(Genre::class)->withTrashed();
+    }
+
+    public function castMembers(): BelongsToMany
+    {
+        return $this->belongsToMany(CastMember::class)->withTrashed();
     }
 
     public static function handleRelations(Video $video, array $attributes): void
@@ -151,6 +155,9 @@ class Video extends UuidModel
         }
         if (isset($attributes['genres_id'])) {
             $video->genres()->sync($attributes['genres_id']);
+        }
+        if (isset($attributes['cast_members_id'])) {
+            $video->castMembers()->sync($attributes['cast_members_id']);
         }
     }
 
