@@ -165,8 +165,6 @@ export class FilterManager {
                 ...this.debouncedState,
                 search: this.cleanSearchText(this.debouncedState.search)
             },
-            //hash: '',
-            //key: '',
         }
 
         const oldState = this.history.location.state;

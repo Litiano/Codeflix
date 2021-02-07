@@ -49,3 +49,13 @@ export interface CastMember extends Timestamps, SoftDeletes {
     name: string;
     type: number;
 }
+
+export const CastMemberTypeMap = {
+    1: 'Diretor',
+    2: 'Ator',
+}
+
+export const YesNoTypeMap = {
+    0: 'Não',
+    1: 'Sim'
+}

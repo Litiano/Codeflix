@@ -25,4 +25,9 @@ class GenreFilter extends DefaultModelFilter
 
         \Log::info($this->toSql());
     }
+
+    public function isActive(bool $isActive): void
+    {
+        $this->where('is_active', $isActive);
+    }
 }

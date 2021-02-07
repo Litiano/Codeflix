@@ -3,7 +3,7 @@ import {useEffect, useRef, useState} from "react";
 import {parseISO, format} from 'date-fns';
 import categoryHttp from "../../utils/http/category-http";
 import {BadgeNo, BadgeYes} from "../../components/Badge";
-import {Category, ListResponse} from "../../utils/models";
+import {CastMemberTypeMap, Category, ListResponse, YesNoTypeMap} from "../../utils/models";
 import DefaultTable, {makeActionStyles, TableColumn, MuiDataTableRefComponent} from '../../components/Table';
 import {useSnackbar} from "notistack";
 import {MuiThemeProvider} from "@material-ui/core/styles";
@@ -12,7 +12,10 @@ import {Link} from "react-router-dom";
 import EditIcon from '@material-ui/icons/Edit';
 import {FilterResetButton} from "../../components/Table/FilterResetButton";
 import useFilter from "../../hooks/useFilter";
+import {invert} from "lodash";
+import * as yup from "../../utils/vendor/yup";
 
+const yesNoNames = Object.values(YesNoTypeMap);
 const columnsDefinition: TableColumn[] = [
     {
         name: 'id',
@@ -35,6 +38,9 @@ const columnsDefinition: TableColumn[] = [
         name: 'is_active',
         label: 'Ativo',
         options: {
+            filterOptions: {
+                names: yesNoNames
+            },
             customBodyRender(value, tableMeta, updateValue): JSX.Element {
                 return value ? <BadgeYes/> : <BadgeNo/>
             }
@@ -87,7 +93,7 @@ const Table = (props: Props) => {
     const subscribed = useRef(true);
     const [data, setData] = useState<Category[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
-    const tableRef = useRef() as React.MutableRefObject<MuiDataTableRefComponent>
+    const tableRef = useRef() as React.MutableRefObject<MuiDataTableRefComponent>;
 
     const {
         columns,
@@ -102,7 +108,37 @@ const Table = (props: Props) => {
         rowsPerPage: rowsPerPage,
         rowsPerPageOptions: rowsPerPageOptions,
         tableRef: tableRef,
+        extraFilter: {
+            formatSearchParams: (debouncedState) => {
+                return debouncedState.extraFilter ? {
+                    ...(
+                        debouncedState.extraFilter.is_active &&
+                        {is_active: debouncedState.extraFilter.is_active}
+                    )
+                } : undefined;
+            },
+            getStateFromUrl: (queryParams) => {
+                return {
+                    is_active: queryParams.get('is_active')
+                }
+            },
+            createValidationSchema: () => {
+                return yup.object().shape({
+                    is_active: yup.string()
+                        .nullable()
+                        .transform(value => {
+                            return !value || !yesNoNames.includes(value) ? undefined : value;
+                        })
+                        .default(null)
+                })
+            },
+        }
     });
+
+    const indexColumnIsAtive = columns.findIndex(c => c.name === 'is_active');
+    const columnIsActive = columns[indexColumnIsAtive];
+    const isActiveFilterValue = filterState.extraFilter && filterState.extraFilter.is_active as never;
+    (columnIsActive.options as any).filterList = isActiveFilterValue ? [isActiveFilterValue] : [];
 
     useEffect(() => {
         subscribed.current = true;
@@ -118,10 +154,12 @@ const Table = (props: Props) => {
         debouncedFilterState.pagination.page,
         debouncedFilterState.pagination.per_page,
         debouncedFilterState.order,
+        JSON.stringify(debouncedFilterState.extraFilter),
     ]);
 
     async function getData() {
         setLoading(true);
+        filterManager.pushHistory();
         try {
             if (!subscribed.current) {
                 return;
@@ -133,6 +171,11 @@ const Table = (props: Props) => {
                     per_page: filterState.pagination.per_page,
                     sort: filterState.order.sort,
                     dir: filterState.order.dir,
+                    ...(
+                        debouncedFilterState.extraFilter &&
+                        debouncedFilterState.extraFilter.is_active &&
+                        {is_active: invert(YesNoTypeMap)[debouncedFilterState.extraFilter.is_active]}
+                    ),
                 }
             });
             setData(data.data);
@@ -163,6 +206,12 @@ const Table = (props: Props) => {
                     rowsPerPageOptions: filterManager.rowsPerPageOptions,
                     count: totalRecords,
                     serverSide: true,
+                    onFilterChange: (column, filterList) => {
+                        const columnIndex = columns.findIndex(c => c.name === column);
+                        filterManager.changeExtraFilter({
+                            [column as string]: filterList[columnIndex].length ? filterList[columnIndex][0] : null
+                        })
+                    },
                     customToolbar: () => (
                         <FilterResetButton handleClick={() => filterManager.resetFilter()}/>
                     ),
