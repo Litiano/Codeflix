@@ -16,8 +16,8 @@ abstract class BasicCrudController extends Controller
     abstract protected function model(): string|Model;
     abstract protected function rulesStore(): array;
     abstract protected function rulesUpdate(): array;
-    protected abstract function resourceCollection(): string|JsonResource;
-    protected abstract function resource(): string|JsonResource;
+    abstract protected function resourceCollection(): string|JsonResource;
+    abstract protected function resource(): string|JsonResource;
     protected int $defaultPerPage = 15;
 
     public function index(Request $request)

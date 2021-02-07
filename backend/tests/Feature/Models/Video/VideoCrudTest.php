@@ -3,7 +3,6 @@
 
 namespace Tests\Feature\Models\Video;
 
-
 use App\Models\Category;
 use App\Models\Genre;
 use App\Models\Video;
@@ -65,7 +64,8 @@ class VideoCrudTest extends BaseVideoTestCase
     {
         $category = factory(Category::class)->create();
         $genre = factory(Genre::class)->create();
-        $video = Video::create($this->data + [
+        $video = Video::create(
+            $this->data + [
                 'categories_id' => [$category->id],
                 'genres_id' => [$genre->id],
             ]

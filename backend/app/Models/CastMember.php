@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-
 use App\ModelFilters\CastMemberFilter;
 use App\Models\Traits\UuidModel;
 use EloquentFilter\Filterable;

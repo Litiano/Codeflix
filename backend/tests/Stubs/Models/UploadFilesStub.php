@@ -3,7 +3,6 @@
 
 namespace Tests\Stubs\Models;
 
-
 use App\Models\Traits\UploadFiles;
 use Illuminate\Database\Schema\Blueprint;
 

@@ -3,7 +3,6 @@
 
 namespace Tests\Traits;
 
-
 trait TestStorages
 {
     protected function deleteAllFiles()

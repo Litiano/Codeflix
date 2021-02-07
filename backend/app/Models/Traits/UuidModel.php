@@ -3,7 +3,6 @@
 
 namespace App\Models\Traits;
 
-
 use Illuminate\Database\Eloquent\Model;
 use Ramsey\Uuid\Uuid;
 

@@ -3,7 +3,6 @@
 
 namespace Tests\Traits;
 
-
 trait TestProd
 {
     protected function skipTestIfProd(string $message = '')

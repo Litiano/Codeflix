@@ -3,7 +3,6 @@
 
 namespace Tests\Feature\Http\Controllers\Api\VideoController;
 
-
 use App\Http\Resources\VideoResource;
 use App\Models\Category;
 use App\Models\Genre;
@@ -112,7 +111,6 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
         $data = ['title' => str_repeat('a', 256)];
         $this->assertInvalidationStoreAction($data, 'max.string', ['max' => '255']);
         $this->assertInvalidationUpdateAction($data, 'max.string', ['max' => '255']);
-
     }
 
     public function testInvalidationInteger()

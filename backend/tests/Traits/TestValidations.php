@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Tests\Traits;
 
-
 use Illuminate\Foundation\Testing\TestResponse;
 use Lang;
 

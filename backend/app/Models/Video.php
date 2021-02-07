@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-
 use App\Models\Traits\UploadFiles;
 use App\Models\Traits\UuidModel;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;

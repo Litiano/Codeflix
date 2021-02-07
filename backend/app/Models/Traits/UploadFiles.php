@@ -3,7 +3,6 @@
 
 namespace App\Models\Traits;
 
-
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
@@ -80,7 +79,7 @@ trait UploadFiles
         return Storage::url($this->relativeFilePath($fileName));
     }
 
-    protected abstract function uploadDir(): string;
+    abstract protected function uploadDir(): string;
 
-    protected abstract static function getFileFields(): array;
+    abstract protected static function getFileFields(): array;
 }

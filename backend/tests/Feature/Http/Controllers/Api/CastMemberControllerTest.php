@@ -97,14 +97,16 @@ class CastMemberControllerTest extends TestCase
         $response = $this->assertUpdate($data, $data + ['deleted_at' => null]);
         $response->assertJsonStructure(['data' => $this->fieldsSerialized]);
         $this->assertResource(
-            $response, new CastMemberResource(CastMember::find($this->getIdFromResponse($response)))
+            $response,
+            new CastMemberResource(CastMember::find($this->getIdFromResponse($response)))
         );
 
         $data = ['name' => 'test 2', 'type' => CastMember::TYPE_DIRECTOR,];
         $response = $this->assertUpdate($data, $data);
         $response->assertJsonStructure(['data' => $this->fieldsSerialized]);
         $this->assertResource(
-            $response, new CastMemberResource(CastMember::find($this->getIdFromResponse($response)))
+            $response,
+            new CastMemberResource(CastMember::find($this->getIdFromResponse($response)))
         );
     }
 

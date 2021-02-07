@@ -28,5 +28,4 @@ class CategoryStub extends EloquentModel
     {
         Schema::dropIfExists('category_stubs');
     }
-
 }
