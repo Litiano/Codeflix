@@ -16,7 +16,7 @@ trait UploadFiles
     {
         self::updating(function (Model $model) {
             $fieldsUpdated = array_keys($model->getDirty());
-            $filesUpdated = array_intersect($fieldsUpdated, self::getFileFields());
+            $filesUpdated = array_intersect($fieldsUpdated, static::getFileFields());
             $filesToDelete = Arr::where($filesUpdated, function ($fileField) use ($model) {
                 return $model->getOriginal($fileField);
             });
@@ -59,7 +59,7 @@ trait UploadFiles
     public static function extractFiles(array &$attributes = []): array
     {
         $files = [];
-        foreach (self::getFileFields() as $field) {
+        foreach (static::getFileFields() as $field) {
             if (isset($attributes[$field]) && $attributes[$field] instanceof UploadedFile) {
                 $files[] = $attributes[$field];
                 $attributes[$field] = $attributes[$field]->hashName();
