@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Resources\CastMemberResource;
 use App\Models\CastMember;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CastMemberController extends BasicCrudController
@@ -18,7 +19,7 @@ class CastMemberController extends BasicCrudController
         ];
     }
 
-    protected function model(): string
+    protected function model(): string|Model
     {
         return CastMember::class;
     }

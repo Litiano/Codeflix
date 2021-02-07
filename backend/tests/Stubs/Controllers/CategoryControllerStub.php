@@ -12,7 +12,7 @@ class CategoryControllerStub extends BasicCrudController
     /**
      * @return Model
      */
-    protected function model(): string
+    protected function model(): string|Model
     {
         return CategoryStub::class;
     }

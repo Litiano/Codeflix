@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CategoryController extends BasicCrudController
@@ -14,7 +15,7 @@ class CategoryController extends BasicCrudController
         'is_active' => 'boolean',
     ];
 
-    protected function model(): string
+    protected function model(): string|Model
     {
         return Category::class;
     }

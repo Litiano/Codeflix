@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Resources\VideoResource;
 use App\Models\Video;
 use App\Rules\GenresHasCategoriesRule;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -62,7 +63,7 @@ class VideoController extends BasicCrudController
         $this->rules['genres_id'][] = new GenresHasCategoriesRule($categoriesId);
     }
 
-    protected function model(): string
+    protected function model(): string|Model
     {
         return Video::class;
     }
