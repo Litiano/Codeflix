@@ -5,18 +5,20 @@ namespace App\Models;
 use App\ModelFilters\CategoryFilter;
 use App\Models\Traits\UuidModel;
 use EloquentFilter\Filterable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * App\Models\Category
+ * App\Models\Category.
  *
- * @property string $id
- * @property string $name
- * @property string|null $description
- * @property bool $is_active
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string                          $id
+ * @property string                          $name
+ * @property null|string                     $description
+ * @property bool                            $is_active
+ * @property null|\Illuminate\Support\Carbon $deleted_at
+ * @property null|\Illuminate\Support\Carbon $created_at
+ * @property null|\Illuminate\Support\Carbon $updated_at
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|Category newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Category newQuery()
  * @method static \Illuminate\Database\Query\Builder|Category onlyTrashed()
@@ -34,16 +36,22 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Category extends UuidModel
 {
-    use SoftDeletes, Filterable;
+    use SoftDeletes;
+    use Filterable;
 
     protected $fillable = ['name', 'description', 'is_active'];
 
     protected $casts = [
-        'is_active' => 'bool'
+        'is_active' => 'bool',
     ];
 
     public function modelFilter(): ?string
     {
         return $this->provideFilter(CategoryFilter::class);
+    }
+
+    public function genres(): BelongsToMany
+    {
+        return $this->belongsToMany(Genre::class)->withTrashed();
     }
 }

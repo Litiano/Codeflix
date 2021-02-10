@@ -10,7 +10,7 @@ import {DefaultForm} from "../../../components/DefaultForm";
 import {
     Card, CardContent,
     Checkbox,
-    FormControlLabel,
+    FormControlLabel, FormHelperText,
     Grid,
     TextField,
     Typography,
@@ -22,8 +22,8 @@ import {RatingField} from "./RatingField";
 import {UploadField} from "./UploadField";
 import {Theme} from "@material-ui/core/styles";
 import {makeStyles} from "@material-ui/styles";
-import AsyncAutocomplete from "../../../components/AsyncAutocomplete";
-import genreHttp from "../../../utils/http/genre-http";
+import GenreField from "./GenreField";
+import CategoryField from "./CategoryField";
 
 const useStyles = makeStyles((theme: Theme) => ({
     cardUpload: {
@@ -46,6 +46,14 @@ const validationSchema = yup.object().shape({
         .required(),
     duration: yup.number()
         .label('Duração')
+        .min(1)
+        .required(),
+    genres: yup.array()
+        .label('Gêneros')
+        .min(1)
+        .required(),
+    categories: yup.array()
+        .label('Categorias')
         .min(1)
         .required(),
     rating: yup.string()
@@ -79,11 +87,13 @@ export const Form = () => {
             banner_file: null,
             trailer_file: null,
             video_file: null,
+            genres: [],
+            categories: [],
         }
     });
 
     useEffect(() => {
-        ['rating', 'opened', ...fileFields].forEach((name) => {
+        ['rating', 'opened', 'genres', 'categories', ...fileFields].forEach((name) => {
             register({name: name as any});
         });
     }, [register]);
@@ -133,10 +143,6 @@ export const Form = () => {
             setLoading(false);
         }
     }
-
-    const fetchOptions = (searchText) => genreHttp.list({
-            queryOptions: {search: searchText, all: ''}
-    }).then(({data}) => data.data);
 
     return (
         <DefaultForm
@@ -203,16 +209,38 @@ export const Form = () => {
                         </Grid>
                     </Grid>
                     Elenco
-                    <AsyncAutocomplete
-                        fetchOptions={fetchOptions}
-                        AutocompleteProps={{
-                            freeSolo: false,
-                            getOptionLabel: option => option.name,
-                        }}
-                        TextFieldProps={{
-                            label: 'Gêneros'
-                        }}
-                    />
+                    <br/>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} md={6}>
+                            <GenreField
+                                genres={watch('genres')}
+                                error={errors.genres}
+                                disabled={loading}
+                                setGenres={
+                                    (value) => setValue('genres', value, {shouldValidate: true})
+                                }
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <CategoryField
+                                genres={watch('genres')}
+                                error={errors.categories}
+                                disabled={loading}
+                                categories={watch('categories')}
+                                setCategories={
+                                    (value) => setValue('categories', value, {shouldValidate: true})
+                                }
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <FormHelperText>
+                                Escolha os gêneros do vídeo
+                            </FormHelperText>
+                            <FormHelperText>
+                                Escolha pelo menos uma categoria de cada gênero
+                            </FormHelperText>
+                        </Grid>
+                    </Grid>
                     <br/>
                     Gêneros e ctegorias
                 </Grid>
@@ -221,7 +249,7 @@ export const Form = () => {
                         value={watch('rating')}
                         setValue={(value) => setValue('rating', value, {shouldValidate: true})}
                         error={errors.rating}
-                        formControlPros={{
+                        FormControlPros={{
                             margin: isGreaterMd ? 'none' : 'normal',
                             disabled: loading,
                         }}

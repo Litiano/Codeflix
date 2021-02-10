@@ -2,23 +2,23 @@ import * as React from 'react';
 import {Autocomplete, AutocompleteProps} from "@material-ui/lab";
 import {CircularProgress, TextField, TextFieldProps} from "@material-ui/core";
 import {useEffect, useState} from "react";
-import {useSnackbar} from "notistack";
-import axios from "axios";
+import {useDebounce} from "use-debounce";
 
 interface AsyncAutocompleteProps {
     fetchOptions: (searchText) => Promise<any>;
+    debounceTime?: number;
     TextFieldProps?: TextFieldProps;
     AutocompleteProps?: Omit<AutocompleteProps<any, any, any, any>, 'renderInput' | 'options'>;
 }
 
 export const AsyncAutocomplete: React.FC<AsyncAutocompleteProps> = (props) => {
-    const {AutocompleteProps} = props;
+    const {AutocompleteProps, debounceTime = 300} = props;
     const {freeSolo, onOpen, onClose, onInputChange} = props.AutocompleteProps as any;
     const [open, setOpen] = useState<boolean>(false);
     const [searchText, setSearchText] = useState<string>('');
+    const [debouncedSearchText] = useDebounce(searchText, debounceTime);
     const [loading, setLoading] = useState<boolean>(false);
     const [options, setOptions] = useState<[]>([]);
-    const snackbar = useSnackbar();
     const textFieldProps: TextFieldProps = {
         margin: 'normal',
         variant: 'outlined',
@@ -69,10 +69,10 @@ export const AsyncAutocomplete: React.FC<AsyncAutocompleteProps> = (props) => {
         if (!open && !freeSolo) {
             setOptions([]);
         }
-    }, [open]);
+    }, [open, freeSolo]);
 
     useEffect(() => {
-        if (!open || searchText === '' && freeSolo) {
+        if (!open || (debouncedSearchText === '' && freeSolo)) {
             return;
         }
         let isSubscribed = true;
@@ -80,18 +80,9 @@ export const AsyncAutocomplete: React.FC<AsyncAutocompleteProps> = (props) => {
             setLoading(true);
             try {
                 if (isSubscribed) {
-                    const data = await props.fetchOptions(searchText);
+                    const data = await props.fetchOptions(debouncedSearchText);
                     setOptions(data);
                 }
-            } catch (error) {
-                if (axios.isCancel(error)) {
-                    return;
-                }
-                console.error(error);
-                snackbar.enqueueSnackbar(
-                    'Não foi possível carregar as informações.',
-                    {variant: 'error'}
-                    );
             } finally {
                 setLoading(false);
             }
@@ -100,7 +91,7 @@ export const AsyncAutocomplete: React.FC<AsyncAutocompleteProps> = (props) => {
             isSubscribed = false;
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [freeSolo ? searchText : open]);
+    }, [freeSolo ? debouncedSearchText : open]);
 
     return (
         <Autocomplete {...autocompleteProps}/>

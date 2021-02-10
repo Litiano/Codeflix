@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\ModelFilters;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -19,10 +18,9 @@ class GenreFilter extends DefaultModelFilter
         $idsOrNames = explode(',', $categories);
         $this->whereHas('categories', function (Builder $builder) use ($idsOrNames) {
             $builder->whereIn('id', $idsOrNames)
-                ->orWhereIn('name', $idsOrNames);
+                ->orWhereIn('name', $idsOrNames)
+            ;
         });
-
-        \Log::info($this->toSql());
     }
 
     public function isActive(bool $isActive): void

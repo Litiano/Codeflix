@@ -17,7 +17,7 @@ interface RatingFieldProps {
     value: string;
     setValue: (value) => void;
     error: any;
-    formControlPros?: FormControlProps
+    FormControlPros?: FormControlProps
 }
 
 const ratings:FormControlLabelProps[] = [];
@@ -38,7 +38,7 @@ export const RatingField: React.FC<RatingFieldProps> = (props) => {
     return (
         <FormControl
             error={error !== undefined}
-            {...props.formControlPros}
+            {...props.FormControlPros}
         >
             <FormLabel component="legend">Classificação</FormLabel>
             <Box paddingTop={1}>
