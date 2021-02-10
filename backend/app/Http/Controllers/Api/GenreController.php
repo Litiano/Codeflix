@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Resources\GenreResource;
 use App\Models\Genre;
 use DB;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -56,7 +57,7 @@ class GenreController extends BasicCrudController
         $genre->categories()->sync($request->input('categories_id'));
     }
 
-    protected function model(): string|Model
+    protected function model(): string | Model
     {
         return Genre::class;
     }
@@ -71,13 +72,18 @@ class GenreController extends BasicCrudController
         return $this->rules;
     }
 
-    protected function resourceCollection(): string|JsonResource
+    protected function resourceCollection(): string | JsonResource
     {
         return $this->resource();
     }
 
-    protected function resource(): string|JsonResource
+    protected function resource(): string | JsonResource
     {
         return GenreResource::class;
+    }
+
+    protected function queryBuilder(): Builder
+    {
+        return parent::queryBuilder()->with('categories');
     }
 }

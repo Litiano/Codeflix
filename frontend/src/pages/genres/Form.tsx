@@ -99,11 +99,6 @@ export const Form = () => {
         } finally {
             setLoading(false);
         }
-        genreHttp
-            .create(formData)
-            .then(response => {
-                console.log(response)
-            })
     }
 
     return (

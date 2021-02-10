@@ -216,6 +216,8 @@ export const Form = () => {
                                 genres={watch('genres')}
                                 error={errors.genres}
                                 disabled={loading}
+                                categories={watch('categories')}
+                                setCategories={(value) => setValue('categories', value, {shouldValidate: true})}
                                 setGenres={
                                     (value) => setValue('genres', value, {shouldValidate: true})
                                 }
@@ -241,8 +243,6 @@ export const Form = () => {
                             </FormHelperText>
                         </Grid>
                     </Grid>
-                    <br/>
-                    Gêneros e ctegorias
                 </Grid>
                 <Grid item xs={12} md={6}>
                     <RatingField
