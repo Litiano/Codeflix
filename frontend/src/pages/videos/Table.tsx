@@ -1,22 +1,20 @@
-import * as React from 'react';
-import {useEffect, useRef, useState} from "react";
-import {Chip, IconButton} from "@material-ui/core";
-import {parseISO, format} from 'date-fns';
+import React, {useEffect, useRef, useState} from 'react';
+import {Category, Genre, ListResponse, Video} from "../../utils/models";
+import DefaultTable, {makeActionStyles, MuiDataTableRefComponent, TableColumn} from "../../components/Table";
 import map from "lodash/map";
-import genreHttp from "../../utils/http/genre-http";
-import {Category, Genre, ListResponse, YesNoTypeMap} from "../../utils/models";
-import DefaultTable, {makeActionStyles, MuiDataTableRefComponent, TableColumn} from '../../components/Table';
-import {useSnackbar} from "notistack";
+import {IconButton} from "@material-ui/core";
+import {format, parseISO} from "date-fns";
 import {Link} from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
-import {MuiThemeProvider} from "@material-ui/core/styles";
+import {useSnackbar} from "notistack";
 import useFilter from "../../hooks/useFilter";
 import * as yup from "../../utils/vendor/yup";
-import {invert} from "lodash";
+import videoHttp from "../../utils/http/video-http";
+import {MuiThemeProvider} from "@material-ui/core/styles";
 import {FilterResetButton} from "../../components/Table/FilterResetButton";
 import categoryHttp from "../../utils/http/category-http";
+import genreHttp from "../../utils/http/genre-http";
 
-const yesNoNames = Object.values(YesNoTypeMap);
 const columnsDefinition: TableColumn[] = [
     {
         name: 'id',
@@ -28,10 +26,23 @@ const columnsDefinition: TableColumn[] = [
         width: '30%',
     },
     {
-        name: 'name',
-        label: 'Nome',
+        name: 'title',
+        label: 'Título',
         options: {
             filter: false
+        }
+    },
+    {
+        name: 'genres',
+        label: 'Gêneros',
+        options: {
+            filterType: 'multiselect',
+            filterOptions: {
+                names: []
+            },
+            customBodyRender(value, tableMeta, updateValue): JSX.Element {
+                return <span>{map(value, 'name').join(', ')}</span>
+            }
         }
     },
     {
@@ -44,18 +55,6 @@ const columnsDefinition: TableColumn[] = [
             },
             customBodyRender(value, tableMeta, updateValue): JSX.Element {
                 return <span>{map(value, 'name').join(', ')}</span>
-            }
-        }
-    },
-    {
-        name: 'is_active',
-        label: 'Ativo',
-        options: {
-            filterOptions: {
-                names: yesNoNames
-            },
-            customBodyRender(value, tableMeta, updateValue): JSX.Element {
-                return value ? <Chip label={'Sim'} color={'primary'}/> : <Chip label={'Não'} color={'secondary'}/>
             }
         }
     },
@@ -81,7 +80,7 @@ const columnsDefinition: TableColumn[] = [
                     <IconButton
                         color={'secondary'}
                         component={Link}
-                        to={`/genres/${tableMeta.rowData[0]}/edit`}
+                        to={`/videos/${tableMeta.rowData[0]}/edit`}
                     >
                         <EditIcon/>
                     </IconButton>
@@ -99,12 +98,13 @@ const rowsPerPageOptions = [15, 25, 50];
 const debounceTime = 500;
 
 const Table = (props: Props) => {
-    const [data, setData] = useState<Genre[]>([]);
     const snackbar = useSnackbar();
+    const subscribed = useRef(true);
+    const [data, setData] = useState<Video[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const tableRef = useRef() as React.MutableRefObject<MuiDataTableRefComponent>;
-    const subscribed = useRef(true);
     const [, setCategories] = useState<Category[]>();
+    const [, setGenres] = useState<Genre[]>();
 
     const {
         columns,
@@ -128,12 +128,12 @@ const Table = (props: Props) => {
                             return !value || value === '' ? undefined : value.split(',');
                         })
                         .default(null),
-                    is_active: yup.string()
+                    genres: yup.mixed()
                         .nullable()
                         .transform(value => {
-                            return !value || !yesNoNames.includes(value) ? undefined : value;
+                            return !value || value === '' ? undefined : value.split(',');
                         })
-                        .default(null)
+                        .default(null),
                 })
             },
             formatSearchParams: (debouncedState) => {
@@ -143,29 +143,30 @@ const Table = (props: Props) => {
                         {categories: debouncedState.extraFilter.categories.join(',')}
                     ),
                     ...(
-                        debouncedState.extraFilter.is_active &&
-                        {is_active: debouncedState.extraFilter.is_active}
-                    )
+                        debouncedState.extraFilter.genres &&
+                        {genres: debouncedState.extraFilter.genres.join(',')}
+                    ),
                 } : undefined;
             },
             getStateFromUrl: (queryParams) => {
                 return {
                     categories: queryParams.get('categories'),
-                    is_active: queryParams.get('is_active')
+                    genres: queryParams.get('genres')
                 }
             }
         }
     });
+
 
     const indexColumnCategories = columns.findIndex(c => c.name === 'categories');
     const columnCategories = columns[indexColumnCategories];
     const categoriesFilterValue = filterState.extraFilter && filterState.extraFilter.categories as never;
     (columnCategories.options as any).filterList = categoriesFilterValue ? [categoriesFilterValue] : [];
 
-    const indexColumnIsAtive = columns.findIndex(c => c.name === 'is_active');
-    const columnIsActive = columns[indexColumnIsAtive];
-    const isActiveFilterValue = filterState.extraFilter && filterState.extraFilter.is_active as never;
-    (columnIsActive.options as any).filterList = isActiveFilterValue ? [isActiveFilterValue] : [];
+    const indexColumnGenres = columns.findIndex(c => c.name === 'genres');
+    const columnGenres = columns[indexColumnGenres];
+    const genresFilterValue = filterState.extraFilter && filterState.extraFilter.genres as never;
+    (columnGenres.options as any).filterList = genresFilterValue ? [genresFilterValue] : [];
 
     useEffect(() => {
         subscribed.current = true;
@@ -199,6 +200,22 @@ const Table = (props: Props) => {
         })();
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+    useEffect(() => {
+        let isSubscribed = true;
+        (async () => {
+            try {
+                if (isSubscribed) {
+                    const {data} = await genreHttp.list({queryOptions: {all: ''}});
+                    setGenres(data.data);
+                    (columnGenres.options as any).filterOptions.names = data.data.map(genre => genre.name);
+                }
+            } catch (error) {
+                console.error(error);
+                snackbar.enqueueSnackbar('Não foi possível carregar as informações', {variant: 'error'})
+            }
+        })();
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
     async function getData() {
         setLoading(true);
         filterManager.pushHistory();
@@ -206,7 +223,7 @@ const Table = (props: Props) => {
             if (!subscribed.current) {
                 return;
             }
-            const {data} = await genreHttp.list<ListResponse<Genre>>({
+            const {data} = await videoHttp.list<ListResponse<Video>>({
                 queryOptions: {
                     search: filterManager.cleanSearchText(filterState.search),
                     page: filterState.pagination.page,
@@ -220,15 +237,15 @@ const Table = (props: Props) => {
                     ),
                     ...(
                         debouncedFilterState.extraFilter &&
-                        debouncedFilterState.extraFilter.is_active &&
-                        {is_active: invert(YesNoTypeMap)[debouncedFilterState.extraFilter.is_active]}
-                    )
+                        debouncedFilterState.extraFilter.genres &&
+                        {genres: debouncedFilterState.extraFilter.genres.join(',')}
+                    ),
                 }
             });
             setData(data.data);
             setTotalRecords(data.meta.total);
         } catch (error) {
-            if (genreHttp.isCancelRequest(error)) {
+            if (videoHttp.isCancelRequest(error)) {
                 return;
             }
             console.error(error);
@@ -242,7 +259,7 @@ const Table = (props: Props) => {
         <MuiThemeProvider theme={makeActionStyles(columnsDefinition.length - 1)}>
             <DefaultTable
                 columns={columnsDefinition}
-                title='Listagem de gêneros'
+                title='Listagem de vídeos'
                 data={data}
                 loading={loading}
                 ref={tableRef}
@@ -270,6 +287,6 @@ const Table = (props: Props) => {
             />
         </MuiThemeProvider>
     );
-};
+}
 
 export default Table;

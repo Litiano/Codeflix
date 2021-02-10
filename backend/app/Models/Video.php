@@ -4,27 +4,29 @@ namespace App\Models;
 
 use App\Models\Traits\UploadFiles;
 use App\Models\Traits\UuidModel;
+use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * App\Models\Video
+ * App\Models\Video.
  *
- * @property string $id
- * @property string $title
- * @property string $description
- * @property int $year_launched
- * @property bool $opened
- * @property string $rating
- * @property int $duration
- * @property string|null $video_file
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Category[] $categories
- * @property-read int|null $categories_count
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Genre[] $genres
- * @property-read int|null $genres_count
+ * @property string                                                          $id
+ * @property string                                                          $title
+ * @property string                                                          $description
+ * @property int                                                             $year_launched
+ * @property bool                                                            $opened
+ * @property string                                                          $rating
+ * @property int                                                             $duration
+ * @property null|string                                                     $video_file
+ * @property null|\Illuminate\Support\Carbon                                 $deleted_at
+ * @property null|\Illuminate\Support\Carbon                                 $created_at
+ * @property null|\Illuminate\Support\Carbon                                 $updated_at
+ * @property \App\Models\Category[]|\Illuminate\Database\Eloquent\Collection $categories
+ * @property null|int                                                        $categories_count
+ * @property \App\Models\Genre[]|\Illuminate\Database\Eloquent\Collection    $genres
+ * @property null|int                                                        $genres_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|Video newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Video newQuery()
  * @method static \Illuminate\Database\Query\Builder|Video onlyTrashed()
@@ -43,20 +45,24 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Query\Builder|Video withTrashed()
  * @method static \Illuminate\Database\Query\Builder|Video withoutTrashed()
  * @mixin \Eloquent
- * @property string|null $thumb_file
- * @property string|null $trailer_file
- * @property string|null $banner_file
- * @property-read string|null $banner_file_url
- * @property-read string|null $thumb_file_url
- * @property-read string|null $trailer_file_url
- * @property-read string|null $video_file_url
+ *
+ * @property null|string $thumb_file
+ * @property null|string $trailer_file
+ * @property null|string $banner_file
+ * @property null|string $banner_file_url
+ * @property null|string $thumb_file_url
+ * @property null|string $trailer_file_url
+ * @property null|string $video_file_url
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|Video whereBannerFile($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Video whereThumbFile($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Video whereTrailerFile($value)
  */
 class Video extends UuidModel
 {
-    use SoftDeletes, UploadFiles;
+    use SoftDeletes;
+    use UploadFiles;
+    use Filterable;
 
     public const RATING_LIST = ['L', '10', '12', '14', '16', '18'];
 
@@ -81,7 +87,7 @@ class Video extends UuidModel
     protected $casts = [
         'opened' => 'bool',
         'year_launched' => 'int',
-        'duration' => 'int'
+        'duration' => 'int',
     ];
 
     protected $appends = [
@@ -94,18 +100,21 @@ class Video extends UuidModel
     public static function create(array $attributes = []): self
     {
         $files = self::extractFiles($attributes);
+
         try {
             \DB::beginTransaction();
             $obj = static::query()->create($attributes);
             static::handleRelations($obj, $attributes);
             $obj->uploadFiles($files);
             \DB::commit();
+
             return $obj;
         } catch (\Exception $e) {
             if (isset($obj)) {
                 $obj->deleteFiles($files);
             }
             \DB::rollBack();
+
             throw $e;
         }
     }
@@ -113,6 +122,7 @@ class Video extends UuidModel
     public function update(array $attributes = [], array $options = []): bool
     {
         $files = self::extractFiles($attributes);
+
         try {
             \DB::beginTransaction();
             $updated = parent::update($attributes, $options);
@@ -124,10 +134,12 @@ class Video extends UuidModel
             if ($updated && count($files)) {
                 $this->deleteOldFiles();
             }
+
             return $updated;
         } catch (\Exception $e) {
             \DB::rollBack();
             $this->deleteFiles($files);
+
             throw $e;
         }
     }
@@ -160,11 +172,6 @@ class Video extends UuidModel
         }
     }
 
-    protected function uploadDir():string
-    {
-        return $this->id;
-    }
-
     public static function getFileFields(): array
     {
         return ['video_file', 'thumb_file', 'banner_file', 'trailer_file'];
@@ -188,5 +195,10 @@ class Video extends UuidModel
     public function getVideoFileUrlAttribute(): ?string
     {
         return $this->video_file ? $this->getFileUrl($this->video_file) : null;
+    }
+
+    protected function uploadDir(): string
+    {
+        return $this->id;
     }
 }
