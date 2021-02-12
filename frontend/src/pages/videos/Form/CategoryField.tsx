@@ -72,12 +72,9 @@ export const CategoryField:React.FC<CategoryFieldProps> = (props) => {
                         <GridSelected>
                             {
                                 categories.map((category, key) => {
-                                    console.log(genres);
                                     const genresFromCategory = getGenresFromCategory(genres, category)
                                         .map(genre => genre.name)
                                         .join(', ');
-                                    console.log(getGenresFromCategory(genres, category));
-                                    console.log(genresFromCategory);
                                     return (
                                         <GridSelectedItem onDelete={() => removeItem(category)} xs={12} key={key}>
                                             <Typography noWrap>{category.name}</Typography>

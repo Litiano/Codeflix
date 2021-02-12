@@ -25,7 +25,7 @@ const ratings:FormControlLabelProps[] = [];
 videoRatings.forEach((rating) => {
     ratings.push(
         {
-            value: rating.color,
+            value: rating.value,
             control: <Radio color={'primary'}/>,
             label: <Rating rating={rating.value as any}/>,
             labelPlacement: 'top',

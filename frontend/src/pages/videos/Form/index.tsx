@@ -24,6 +24,9 @@ import {Theme} from "@material-ui/core/styles";
 import {makeStyles} from "@material-ui/styles";
 import GenreField from "./GenreField";
 import CategoryField from "./CategoryField";
+import {map} from 'lodash';
+import CastMemberField from "./CastMemberField";
+import {getCategoriesFromGenre} from "../../../utils/model-filter";
 
 const useStyles = makeStyles((theme: Theme) => ({
     cardUpload: {
@@ -32,35 +35,6 @@ const useStyles = makeStyles((theme: Theme) => ({
         margin: theme.spacing(2, 0),
     }
 }))
-const validationSchema = yup.object().shape({
-    title: yup.string()
-        .label('Título')
-        .required()
-        .max(255),
-    description: yup.string()
-        .label('Sinopse')
-        .required(),
-    year_launched: yup.number()
-        .label('Ano de lançamento')
-        .min(1)
-        .required(),
-    duration: yup.number()
-        .label('Duração')
-        .min(1)
-        .required(),
-    genres: yup.array()
-        .label('Gêneros')
-        .min(1)
-        .required(),
-    categories: yup.array()
-        .label('Categorias')
-        .min(1)
-        .required(),
-    rating: yup.string()
-        .label('Classificação')
-        .required(),
-    opened: yup.boolean(),
-});
 
 const fileFields = Object.keys(VideoFileFieldMap);
 
@@ -74,6 +48,54 @@ export const Form = () => {
     const isGreaterMd = useMediaQuery(theme.breakpoints.up('md'));
     const classes = useStyles();
 
+    const validationSchema = yup.object().shape({
+        title: yup.string()
+            .label('Título')
+            .required()
+            .max(255),
+        description: yup.string()
+            .label('Sinopse')
+            .required(),
+        year_launched: yup.number()
+            .label('Ano de lançamento')
+            .min(1)
+            .required(),
+        duration: yup.number()
+            .label('Duração')
+            .min(1)
+            .required(),
+        genres: yup.array()
+            .label('Gêneros')
+            .min(1)
+            .required()
+            .test({
+                test: (genres: any, options) => {
+                    let hasCategory: any = true;
+                    genres.forEach((genre) => {
+                        let categories = getCategoriesFromGenre(watch('categories'), genre).length !== 0;
+                        if (!categories) {
+                            hasCategory = options.createError({
+                                message: `O gênero ${genre.name} não possui categoria selecionada.`,
+                            });
+                        }
+                    });
+                    return hasCategory;
+                }
+            }),
+        categories: yup.array()
+            .label('Categorias')
+            .min(1)
+            .required(),
+        cast_members: yup.array()
+            .label('Membros do elenco')
+            .min(1)
+            .required(),
+        rating: yup.string()
+            .label('Classificação')
+            .required(),
+        opened: yup.boolean(),
+    });
+
     const {register, handleSubmit, getValues, setValue, errors, reset, watch, trigger} = useForm({
         resolver: yupResolver(validationSchema),
         defaultValues: {
@@ -83,17 +105,14 @@ export const Form = () => {
             duration: '',
             rating: '',
             opened: false,
-            thumb_file: null,
-            banner_file: null,
-            trailer_file: null,
-            video_file: null,
             genres: [],
             categories: [],
+            cast_members: [],
         }
     });
 
     useEffect(() => {
-        ['rating', 'opened', 'genres', 'categories', ...fileFields].forEach((name) => {
+        ['rating', 'opened', 'genres', 'categories', 'cast_members', ...fileFields].forEach((name) => {
             register({name: name as any});
         });
     }, [register]);
@@ -103,7 +122,7 @@ export const Form = () => {
             return;
         }
 
-        (async function getCastMember() {
+        (async function getVideo() {
             setLoading(true);
             try {
                 const {data} = await videoHttp.get(id);
@@ -122,7 +141,31 @@ export const Form = () => {
     async function onSubmit(formData, event) {
         setLoading(true);
         try {
-            const http = id ? videoHttp.update(id, formData) : videoHttp.create(formData);
+            formData.categories_id = map(formData.categories, 'id');
+            formData.genres_id = map(formData.genres, 'id');
+            formData.cast_members_id = map(formData.cast_members, 'id');
+            delete formData.categories;
+            delete formData.genres;
+            delete formData.cast_members;
+
+            formData._method = 'PUT';
+            let newFormData = new FormData();
+            for (let key in formData) {
+                if (formData.hasOwnProperty(key)) {
+                    if (formData[key] === undefined) {
+                        //
+                    } else if (Array.isArray(formData[key])) {
+                        formData[key].forEach((value) => {
+                            newFormData.append(key + '[]', value);
+                        });
+                    } else if (typeof formData[key] === 'boolean') {
+                        newFormData.append(key, formData[key] ? '1' : '0');
+                    } else {
+                        newFormData.append(key, formData[key]);
+                    }
+                }
+            }
+            const http = id ? videoHttp.update(id, newFormData) : videoHttp.create(newFormData);
             const {data} = await http;
             snackbar.enqueueSnackbar('Vídeo salvo com sucesso!', {variant: 'success'});
             setTimeout(() => {
@@ -208,8 +251,17 @@ export const Form = () => {
                             />
                         </Grid>
                     </Grid>
-                    Elenco
-                    <br/>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <CastMemberField
+                                castMembers={watch('cast_members')}
+                                setCastMembers={(value) => {
+                                    setValue('cast_members', value, {shouldValidate: true})
+                                }}
+                                error={errors.cast_members}
+                            />
+                        </Grid>
+                    </Grid>
                     <Grid container spacing={2}>
                         <Grid item xs={12} md={6}>
                             <GenreField
@@ -246,7 +298,7 @@ export const Form = () => {
                 </Grid>
                 <Grid item xs={12} md={6}>
                     <RatingField
-                        value={watch('rating')}
+                        value={String(watch('rating'))}
                         setValue={(value) => setValue('rating', value, {shouldValidate: true})}
                         error={errors.rating}
                         FormControlPros={{
@@ -295,7 +347,7 @@ export const Form = () => {
                                 color={'primary'}
                                 onChange={
                                     () => {
-                                        setValue('opened', !getValues()['opened'])
+                                        setValue('opened', getValues()['opened'])
                                     }
                                 }
                                 checked={watch('opened')}

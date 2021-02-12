@@ -97,6 +97,13 @@ class Video extends UuidModel
         'video_file_url',
     ];
 
+    protected $hidden = [
+        'thumb_file',
+        'banner_file',
+        'trailer_file',
+        'video_file',
+    ];
+
     public static function create(array $attributes = []): self
     {
         $files = self::extractFiles($attributes);
