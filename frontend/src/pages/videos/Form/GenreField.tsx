@@ -1,5 +1,5 @@
 import * as React from 'react';
-import AsyncAutocomplete from "../../../components/AsyncAutocomplete";
+import AsyncAutocomplete, {AsyncAutocompleteComponent} from "../../../components/AsyncAutocomplete";
 import GridSelected from "../../../components/GridSelected";
 import GridSelectedItem from "../../../components/GridSelectedItem";
 import {FormControl, FormControlProps, FormHelperText, Typography} from "@material-ui/core";
@@ -8,8 +8,9 @@ import genreHttp from "../../../utils/http/genre-http";
 import {Category, Genre} from "../../../utils/models";
 import useCollectionManager from "../../../hooks/useCollectionManager";
 import {getGenresFromCategory} from "../../../utils/model-filter";
+import {MutableRefObject, RefAttributes, useImperativeHandle, useRef} from "react";
 
-interface GenreFieldProps {
+interface GenreFieldProps extends RefAttributes<GenreFieldProps> {
     genres: Genre[];
     setGenres: (genres: Genre[]) => void;
     categories: Category[];
@@ -18,11 +19,17 @@ interface GenreFieldProps {
     disabled?: boolean;
     FormControlPros?: FormControlProps;
 }
-export const GenreField:React.FC<GenreFieldProps> = (props) => {
+
+export interface GenreFieldComponent {
+    clear: () => void;
+}
+
+export const GenreField = React.forwardRef<GenreFieldComponent, GenreFieldProps> ((props, ref) => {
     const {genres, setGenres, error, disabled, categories, setCategories} = props;
     const autocompleteHttp = useHttpHandled();
     const {addItem, removeItem} = useCollectionManager(genres, setGenres);
     const {removeItem: removeCategory} = useCollectionManager(categories, setCategories);
+    const autocompleteRef = useRef() as MutableRefObject<AsyncAutocompleteComponent>;
 
     function fetchOptions(searchText) {
         return autocompleteHttp(
@@ -32,9 +39,14 @@ export const GenreField:React.FC<GenreFieldProps> = (props) => {
         ).then(data => data.data)
     }
 
+    useImperativeHandle(ref, () => ({
+        clear: () => autocompleteRef.current.clear()
+    }));
+
     return (
         <>
             <AsyncAutocomplete
+                ref={autocompleteRef}
                 fetchOptions={fetchOptions}
                 AutocompleteProps={{
                     autoSelect: false,
@@ -86,6 +98,6 @@ export const GenreField:React.FC<GenreFieldProps> = (props) => {
             </FormControl>
         </>
     );
-}
+});
 
 export default GenreField;
