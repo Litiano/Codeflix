@@ -160,24 +160,7 @@ export const Form = () => {
             formData.cast_members_id = map(formData.cast_members, 'id');
             formData = omit(formData, ['categories', 'genres', 'cast_members']);
 
-            formData._method = 'PUT';
-            let newFormData = new FormData();
-            for (let key in formData) {
-                if (formData.hasOwnProperty(key)) {
-                    if (formData[key] === undefined) {
-                        //
-                    } else if (Array.isArray(formData[key])) {
-                        formData[key].forEach((value) => {
-                            newFormData.append(key + '[]', value);
-                        });
-                    } else if (typeof formData[key] === 'boolean') {
-                        newFormData.append(key, formData[key] ? '1' : '0');
-                    } else {
-                        newFormData.append(key, formData[key]);
-                    }
-                }
-            }
-            const http = id ? videoHttp.update(id, newFormData) : videoHttp.create(newFormData);
+            const http = id ? videoHttp.update(id, formData) : videoHttp.create(formData);
             const {data} = await http;
             snackbar.enqueueSnackbar('Vídeo salvo com sucesso!', {variant: 'success'});
             id && resetForm(video);
