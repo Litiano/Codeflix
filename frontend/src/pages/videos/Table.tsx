@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import {Category, Genre, ListResponse, Video} from "../../utils/models";
 import DefaultTable, {makeActionStyles, MuiDataTableRefComponent, TableColumn} from "../../components/Table";
 import map from "lodash/map";
@@ -14,6 +14,9 @@ import {MuiThemeProvider} from "@material-ui/core/styles";
 import {FilterResetButton} from "../../components/Table/FilterResetButton";
 import categoryHttp from "../../utils/http/category-http";
 import genreHttp from "../../utils/http/genre-http";
+import DeleteDialog from "../../components/DeleteDialog";
+import useDeleteCollection from "../../hooks/useDeleteCollection";
+import LoadingContext from "../../components/loading/LoadingContext";
 
 const columnsDefinition: TableColumn[] = [
     {
@@ -101,10 +104,11 @@ const Table = (props: Props) => {
     const snackbar = useSnackbar();
     const subscribed = useRef(true);
     const [data, setData] = useState<Video[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
+    const loading = useContext(LoadingContext);
     const tableRef = useRef() as React.MutableRefObject<MuiDataTableRefComponent>;
     const [, setCategories] = useState<Category[]>();
     const [, setGenres] = useState<Genre[]>();
+    const {openDeleteDialog, setOpenDeleteDialog, rowsToDelete, setRowsToDelete} = useDeleteCollection();
 
     const {
         columns,
@@ -217,7 +221,6 @@ const Table = (props: Props) => {
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function getData() {
-        setLoading(true);
         filterManager.pushHistory();
         try {
             if (!subscribed.current) {
@@ -244,19 +247,43 @@ const Table = (props: Props) => {
             });
             setData(data.data);
             setTotalRecords(data.meta.total);
+            setOpenDeleteDialog(false);
         } catch (error) {
             if (videoHttp.isCancelRequest(error)) {
                 return;
             }
             console.error(error);
             snackbar.enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
-        } finally {
-            setLoading(false);
         }
+    }
+
+    function deleteRows(confirmed: boolean) {
+        if (!confirmed) {
+            setOpenDeleteDialog(false);
+            return;
+        }
+        const ids = rowsToDelete.data
+            .map((value) => data[value.index].id)
+            .join(',');
+        videoHttp.deleteCollection({ids})
+            .then((response) => {
+                snackbar.enqueueSnackbar('Registros excluídos com sucesso!', {variant: 'success'});
+                const page = filterState.pagination.page;
+
+                if (rowsToDelete.data.length === data.length && page > 1) {
+                    filterManager.changePage(page - 2)
+                } else {
+                    getData();
+                }
+            }).catch((error) => {
+                console.error(error);
+                snackbar.enqueueSnackbar('Não foi possível excluir os registros', {variant: 'error'});
+        });
     }
 
     return (
         <MuiThemeProvider theme={makeActionStyles(columnsDefinition.length - 1)}>
+            <DeleteDialog open={openDeleteDialog} handleClose={deleteRows}/>
             <DefaultTable
                 columns={columnsDefinition}
                 title='Listagem de vídeos'
@@ -282,7 +309,11 @@ const Table = (props: Props) => {
                     onSearchChange: (value) => filterManager.changeSearch(value),
                     onChangePage: (page) => filterManager.changePage(page),
                     onChangeRowsPerPage: (perPage) => filterManager.changeRowsPerPage(perPage),
-                    onColumnSortChange: (changedColumn, direction) => filterManager.changeColumnSort(changedColumn, direction)
+                    onColumnSortChange: (changedColumn, direction) => filterManager.changeColumnSort(changedColumn, direction),
+                    onRowsDelete: (rowsDeleted) => {
+                        setRowsToDelete(rowsDeleted);
+                        return false;
+                    }
                 }}
             />
         </MuiThemeProvider>

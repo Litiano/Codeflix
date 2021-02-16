@@ -1,4 +1,4 @@
-import React, {createRef, MutableRefObject, useEffect, useRef, useState} from 'react';
+import React, {createRef, MutableRefObject, useContext, useEffect, useRef, useState} from 'react';
 import * as yup from "../../../utils/vendor/yup";
 import {useSnackbar} from "notistack";
 import {useHistory, useParams} from "react-router-dom";
@@ -28,6 +28,8 @@ import {map, omit, zipObject} from 'lodash';
 import CastMemberField, {CastMemberFieldComponent} from "./CastMemberField";
 import {getCategoriesFromGenre} from "../../../utils/model-filter";
 import {InputFileComponent} from "../../../components/InputFile";
+import useSnackbarFormError from "../../../hooks/useSnackbarFormError";
+import LoadingContext from "../../../components/loading/LoadingContext";
 
 const useStyles = makeStyles((theme: Theme) => ({
     cardUpload: {
@@ -50,7 +52,7 @@ export const Form = () => {
     const snackbar = useSnackbar();
     const history = useHistory();
     const {id} = useParams();
-    const [loading, setLoading] = useState<boolean>(false);
+    const loading = useContext(LoadingContext);
     const [video, setVideo] = useState<Video | null>(null);
     const theme = useTheme();
     const isGreaterMd = useMediaQuery(theme.breakpoints.up('md'));
@@ -110,7 +112,7 @@ export const Form = () => {
         opened: yup.boolean(),
     });
 
-    const {register, handleSubmit, getValues, setValue, errors, reset, watch, trigger} = useForm({
+    const {register, handleSubmit, getValues, setValue, errors, reset, watch, trigger, formState} = useForm({
         resolver: yupResolver(validationSchema),
         defaultValues: {
             title: '',
@@ -125,6 +127,9 @@ export const Form = () => {
         }
     });
 
+    // @todo não executa com botão salvar.
+    useSnackbarFormError(formState.submitCount, errors);
+
     useEffect(() => {
         ['rating', 'opened', 'genres', 'categories', 'cast_members', ...fileFields].forEach((name) => {
             register({name: name as any});
@@ -137,7 +142,6 @@ export const Form = () => {
         }
 
         (async function getVideo() {
-            setLoading(true);
             try {
                 const {data} = await videoHttp.get(id);
                 setVideo(data.data);
@@ -145,15 +149,12 @@ export const Form = () => {
             } catch (error) {
                 console.error(error);
                 snackbar.enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
-            } finally {
-                setLoading(false);
             }
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     async function onSubmit(formData, event) {
-        setLoading(true);
         try {
             formData.categories_id = map(formData.categories, 'id');
             formData.genres_id = map(formData.genres, 'id');
@@ -178,8 +179,6 @@ export const Form = () => {
         } catch (error) {
             console.error(error);
             snackbar.enqueueSnackbar('Erro ao salvar vídeo!', {variant: 'error'})
-        } finally {
-            setLoading(false);
         }
     }
 

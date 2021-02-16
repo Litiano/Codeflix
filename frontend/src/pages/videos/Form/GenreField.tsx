@@ -77,10 +77,8 @@ export const GenreField = React.forwardRef<GenreFieldComponent, GenreFieldProps>
                                     <GridSelectedItem onDelete={() => {
                                         const categoriesWithOneGenre = categories.filter(category => {
                                             const genresFromCategory = getGenresFromCategory(genres, category);
-                                            //console.log(genresFromCategory);
                                             return genresFromCategory.length === 1 && genresFromCategory[0].id === genre.id;
                                         });
-                                        //console.log(categoriesWithOneGenre);
                                         categoriesWithOneGenre.forEach(cat => {
                                             removeCategory(cat);
                                         });

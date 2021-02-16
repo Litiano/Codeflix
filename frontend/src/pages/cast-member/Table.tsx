@@ -1,5 +1,5 @@
-import * as React from 'react';
-import {useEffect, useRef, useState} from "react";
+ import * as React from 'react';
+import {useContext, useEffect, useRef, useState} from "react";
 import {parseISO, format} from 'date-fns';
 import castMemberHttp from "../../utils/http/cast-member-http";
 import {CastMember, CastMemberTypeMap, ListResponse} from "../../utils/models";
@@ -13,6 +13,7 @@ import useFilter from "../../hooks/useFilter";
 import * as yup from '../../utils/vendor/yup';
 import {invert} from 'lodash';
 import {FilterResetButton} from "../../components/Table/FilterResetButton";
+ import LoadingContext from "../../components/loading/LoadingContext";
 
 const castMemberNames = Object.values(CastMemberTypeMap);
 
@@ -87,7 +88,7 @@ const debounceTime = 500;
 const Table = (props: Props) => {
     const [data, setData] = useState<CastMember[]>([]);
     const snackbar = useSnackbar();
-    const [loading, setLoading] = useState<boolean>(false);
+    const loading = useContext(LoadingContext);
     const tableRef = useRef() as React.MutableRefObject<MuiDataTableRefComponent>;
     const subscribed = useRef(true);
 
@@ -158,7 +159,6 @@ const Table = (props: Props) => {
     ]);
 
     async function getData() {
-        setLoading(true);
         try {
             if (!subscribed.current) {
                 return;
@@ -185,8 +185,6 @@ const Table = (props: Props) => {
             }
             console.error(error);
             snackbar.enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
-        } finally {
-            setLoading(false);
         }
     }
 

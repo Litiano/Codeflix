@@ -7,7 +7,7 @@ import {
 } from "@material-ui/core";
 import {useForm} from "react-hook-form";
 import genreHttp from "../../utils/http/genre-http";
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import categoryHttp from "../../utils/http/category-http";
 import {useHistory, useParams} from "react-router-dom";
 import {useSnackbar} from "notistack";
@@ -16,6 +16,8 @@ import {yupResolver} from "@hookform/resolvers/yup";
 import {Category, Genre} from "../../utils/models";
 import SubmitActions from "../../components/SubmitActions";
 import {DefaultForm} from "../../components/DefaultForm";
+import useSnackbarFormError from "../../hooks/useSnackbarFormError";
+import LoadingContext from "../../components/loading/LoadingContext";
 
 const validationSchema = yup.object().shape({
     name: yup.string().label('Nome').required().max(255),
@@ -23,20 +25,22 @@ const validationSchema = yup.object().shape({
 });
 
 export const Form = () => {
-    const [loading, setLoading] = useState<boolean>(false);
+    const loading = useContext(LoadingContext);
     const history = useHistory();
     const snackbar = useSnackbar();
     const [categories, setCategories] = useState<Category[]>([]);
     const {id} = useParams();
     const [, setGenre] = useState<Genre | null>(null);
 
-    const {register, handleSubmit, getValues, setValue, errors, reset, watch, trigger} = useForm({
+    const {register, handleSubmit, getValues, setValue, errors, reset, watch, trigger, formState} = useForm({
         resolver: yupResolver(validationSchema),
         defaultValues: {
             name: '',
             categories_id: [],
         }
     });
+
+    useSnackbarFormError(formState.submitCount, errors);
 
     useEffect(() => {
         register({name: 'categories_id'})
@@ -45,7 +49,6 @@ export const Form = () => {
     useEffect(() => {
         let isSubscribed = true;
         (async function loadData() {
-            setLoading(true);
             const promises = [categoryHttp.list({queryOptions: {all: ''}})];
             if (id) {
                 promises.push(genreHttp.get(id));
@@ -65,8 +68,6 @@ export const Form = () => {
             } catch (error) {
                 console.error(error);
                 snackbar.enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
-            } finally {
-                setLoading(false);
             }
         })();
 
@@ -77,7 +78,6 @@ export const Form = () => {
     }, []);
 
     async function onSubmit(formData, event) {
-        setLoading(true);
         try {
             const http = id ? genreHttp.update(id, formData) : genreHttp.create(formData);
             const {data} = await http;
@@ -96,8 +96,6 @@ export const Form = () => {
         } catch (error) {
             console.error(error);
             snackbar.enqueueSnackbar('Erro ao salvar gênero!', {variant: 'error'})
-        } finally {
-            setLoading(false);
         }
     }
 

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useEffect, useRef, useState} from "react";
+import {useContext, useEffect, useRef, useState} from "react";
 import {Chip, IconButton} from "@material-ui/core";
 import {parseISO, format} from 'date-fns';
 import map from "lodash/map";
@@ -15,6 +15,7 @@ import * as yup from "../../utils/vendor/yup";
 import {invert} from "lodash";
 import {FilterResetButton} from "../../components/Table/FilterResetButton";
 import categoryHttp from "../../utils/http/category-http";
+import LoadingContext from "../../components/loading/LoadingContext";
 
 const yesNoNames = Object.values(YesNoTypeMap);
 const columnsDefinition: TableColumn[] = [
@@ -101,7 +102,7 @@ const debounceTime = 500;
 const Table = (props: Props) => {
     const [data, setData] = useState<Genre[]>([]);
     const snackbar = useSnackbar();
-    const [loading, setLoading] = useState<boolean>(false);
+    const loading = useContext(LoadingContext);
     const tableRef = useRef() as React.MutableRefObject<MuiDataTableRefComponent>;
     const subscribed = useRef(true);
     const [, setCategories] = useState<Category[]>();
@@ -200,7 +201,6 @@ const Table = (props: Props) => {
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function getData() {
-        setLoading(true);
         filterManager.pushHistory();
         try {
             if (!subscribed.current) {
@@ -233,8 +233,6 @@ const Table = (props: Props) => {
             }
             console.error(error);
             snackbar.enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
-        } finally {
-            setLoading(false);
         }
     }
 

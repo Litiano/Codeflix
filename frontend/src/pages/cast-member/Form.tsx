@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useEffect, useState} from 'react';
+import {useContext, useEffect, useState} from 'react';
 import {
     FormControl,
     FormControlLabel,
@@ -18,6 +18,8 @@ import {useHistory, useParams} from "react-router-dom";
 import {CastMember} from "../../utils/models";
 import SubmitActions from "../../components/SubmitActions";
 import {DefaultForm} from "../../components/DefaultForm";
+import useSnackbarFormError from "../../hooks/useSnackbarFormError";
+import LoadingContext from "../../components/loading/LoadingContext";
 
 const validationSchema = yup.object().shape({
     name: yup.string().label('Nome').required().max(255),
@@ -29,9 +31,9 @@ export const Form = () => {
     const history = useHistory();
     const {id} = useParams();
     const [, setCastMember] = useState<CastMember | null>(null);
-    const [loading, setLoading] = useState<boolean>(false);
+    const loading = useContext(LoadingContext);
 
-    const {register, handleSubmit, getValues, setValue, errors, reset, watch, trigger} = useForm({
+    const {register, handleSubmit, getValues, setValue, errors, reset, watch, trigger, formState} = useForm({
         resolver: yupResolver(validationSchema),
         defaultValues: {
             name: '',
@@ -39,13 +41,14 @@ export const Form = () => {
         }
     });
 
+    useSnackbarFormError(formState.submitCount, errors);
+
     useEffect(() => {
         if (!id) {
             return;
         }
 
         (async function getCastMember() {
-            setLoading(true);
             try {
                 const {data} = await castMemberHttp.get(id);
                 setCastMember(data.data);
@@ -53,8 +56,6 @@ export const Form = () => {
             } catch (error) {
                 console.error(error);
                 snackbar.enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
-            } finally {
-                setLoading(false);
             }
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -65,7 +66,6 @@ export const Form = () => {
     }, [register]);
 
     async function onSubmit(formData, event) {
-        setLoading(true);
         try {
             const http = id ? castMemberHttp.update(id, formData) : castMemberHttp.create(formData);
             const {data} = await http;
@@ -84,8 +84,6 @@ export const Form = () => {
         } catch (error) {
             console.error(error);
             snackbar.enqueueSnackbar('Erro ao salvar membro!', {variant: 'error'});
-        } finally {
-            setLoading(false);
         }
     }
 

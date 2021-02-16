@@ -8,12 +8,14 @@ import {useForm} from "react-hook-form";
 import categoryHttp from "../../utils/http/category-http";
 import * as yup from '../../utils/vendor/yup';
 import {yupResolver} from '@hookform/resolvers/yup';
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import {useParams, useHistory} from "react-router-dom";
 import {useSnackbar} from "notistack";
 import {Category} from "../../utils/models";
 import SubmitActions from "../../components/SubmitActions";
 import {DefaultForm} from "../../components/DefaultForm";
+import useSnackbarFormError from "../../hooks/useSnackbarFormError";
+import LoadingContext from "../../components/loading/LoadingContext";
 
 const validationSchema = yup.object().shape({
     name: yup.string().label('Nome').required().max(255)
@@ -22,11 +24,11 @@ const validationSchema = yup.object().shape({
 export const Form = () => {
     const {id} = useParams();
     const [, setCategory] = useState<Category | null>(null);
-    const [loading, setLoading] = useState<boolean>(false);
+    const loading = useContext(LoadingContext);
     const history = useHistory();
     const snackbar = useSnackbar();
 
-    const {register, handleSubmit, getValues, setValue, errors, reset, watch, trigger} = useForm({
+    const {register, handleSubmit, getValues, setValue, errors, reset, watch, trigger, formState} = useForm({
         resolver: yupResolver(validationSchema),
         defaultValues: {
             is_active: true,
@@ -34,6 +36,8 @@ export const Form = () => {
             description: ''
         }
     });
+
+    useSnackbarFormError(formState.submitCount, errors);
 
     useEffect(() => {
         register({name: 'is_active'})
@@ -45,7 +49,6 @@ export const Form = () => {
         }
 
         (async function getCategory() {
-            setLoading(true);
             try {
                 const {data} = await categoryHttp.get(id);
                 setCategory(data.data);
@@ -53,15 +56,12 @@ export const Form = () => {
             } catch (error) {
                 console.error(error);
                 snackbar.enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
-            } finally {
-                setLoading(false);
             }
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     async function onSubmit(formData, event) {
-        setLoading(true);
         try {
             const http = id ? categoryHttp.update(id, formData) : categoryHttp.create(formData);
             const {data} = await http;
@@ -80,8 +80,6 @@ export const Form = () => {
         } catch (error) {
             console.error(error);
             snackbar.enqueueSnackbar('Erro ao salvar categoria!', {variant: 'error'})
-        } finally {
-            setLoading(false);
         }
     }
 
