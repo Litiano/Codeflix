@@ -13,16 +13,11 @@ use Illuminate\Http\Response;
 
 abstract class BasicCrudController extends Controller
 {
-    abstract protected function model(): string|Model;
-    abstract protected function rulesStore(): array;
-    abstract protected function rulesUpdate(): array;
-    abstract protected function resourceCollection(): string|JsonResource;
-    abstract protected function resource(): string|JsonResource;
     protected int $defaultPerPage = 15;
 
     public function index(Request $request)
     {
-        $perPage = (int)$request->input('per_page', $this->defaultPerPage);
+        $perPage = (int) $request->input('per_page', $this->defaultPerPage);
         $hasFilter = in_array(Filterable::class, class_uses($this->model()));
         $query = $this->queryBuilder();
         if ($hasFilter) {
@@ -49,14 +44,6 @@ abstract class BasicCrudController extends Controller
         return new $resource($model);
     }
 
-    protected function findOrFail($id): Model
-    {
-        $model = $this->model();
-        $keyName = (new $model)->getRouteKeyName();
-
-        return $this->queryBuilder()->where($keyName, $id)->firstOrFail();
-    }
-
     public function show($id)
     {
         $obj = $this->findOrFail($id);
@@ -81,6 +68,43 @@ abstract class BasicCrudController extends Controller
         $model->delete();
 
         return response()->noContent();
+    }
+
+    public function destroyCollection(Request $request): Response
+    {
+        $data = $this->validateIds($request);
+        $this->model()::whereIn('id', $data['ids'])->delete();
+
+        return response()->noContent();
+    }
+
+    protected function validateIds(Request $request): array
+    {
+        $ids = explode(',', $request->input('ids'));
+        $validator = \Validator::make(
+            ['ids' => $ids],
+            ['ids' => 'required|exists:'.$this->model().',id']
+        );
+
+        return $validator->validate();
+    }
+
+    abstract protected function model(): string | Model;
+
+    abstract protected function rulesStore(): array;
+
+    abstract protected function rulesUpdate(): array;
+
+    abstract protected function resourceCollection(): string | JsonResource;
+
+    abstract protected function resource(): string | JsonResource;
+
+    protected function findOrFail($id): Model
+    {
+        $model = $this->model();
+        $keyName = (new $model())->getRouteKeyName();
+
+        return $this->queryBuilder()->where($keyName, $id)->firstOrFail();
     }
 
     protected function queryBuilder(): Builder
