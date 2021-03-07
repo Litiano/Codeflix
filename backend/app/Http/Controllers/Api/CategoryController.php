@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Resources\Json\JsonResource;
 
 class CategoryController extends BasicCrudController
 {
@@ -15,7 +14,7 @@ class CategoryController extends BasicCrudController
         'is_active' => 'boolean',
     ];
 
-    protected function model(): string|Model
+    protected function model(): string | Model
     {
         return Category::class;
     }
@@ -30,12 +29,12 @@ class CategoryController extends BasicCrudController
         return $this->rules;
     }
 
-    protected function resourceCollection(): string|JsonResource
+    protected function resourceCollection(): string | CategoryResource
     {
         return $this->resource();
     }
 
-    protected function resource(): string|JsonResource
+    protected function resource(): string | CategoryResource
     {
         return CategoryResource::class;
     }

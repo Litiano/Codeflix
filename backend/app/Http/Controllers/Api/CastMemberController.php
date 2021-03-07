@@ -15,11 +15,11 @@ class CastMemberController extends BasicCrudController
     {
         $this->rules = [
             'name' => 'required|max:255',
-            'type' => 'required|in:' . implode(',', [CastMember::TYPE_DIRECTOR, CastMember::TYPE_ACTOR])
+            'type' => 'required|in:'.implode(',', [CastMember::TYPE_DIRECTOR, CastMember::TYPE_ACTOR]),
         ];
     }
 
-    protected function model(): string|Model
+    protected function model(): string | Model
     {
         return CastMember::class;
     }
@@ -34,12 +34,12 @@ class CastMemberController extends BasicCrudController
         return $this->rules;
     }
 
-    protected function resource(): string|JsonResource
+    protected function resource(): string | CastMemberResource
     {
         return CastMemberResource::class;
     }
 
-    protected function resourceCollection(): string|JsonResource
+    protected function resourceCollection(): string | CastMemberResource
     {
         return $this->resource();
     }

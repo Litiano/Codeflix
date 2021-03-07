@@ -72,12 +72,12 @@ class GenreController extends BasicCrudController
         return $this->rules;
     }
 
-    protected function resourceCollection(): string | JsonResource
+    protected function resourceCollection(): string | GenreResource
     {
         return $this->resource();
     }
 
-    protected function resource(): string | JsonResource
+    protected function resource(): string | GenreResource
     {
         return GenreResource::class;
     }
