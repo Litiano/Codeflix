@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Http\Resources\Json\ResourceCollection as JsonResourceCollection;
 use Illuminate\Http\Response;
 
 abstract class BasicCrudController extends Controller
@@ -27,9 +27,7 @@ abstract class BasicCrudController extends Controller
 
         $resource = $this->resourceCollection();
 
-        $refClass = new \ReflectionClass($resource);
-
-        return $refClass->isSubclassOf(ResourceCollection::class)
+        return is_subclass_of($resource, JsonResourceCollection::class)
             ? new $resource($data) : $resource::collection($data);
     }
 

@@ -14,7 +14,7 @@ class CategoryTest extends TestCase
 
     public function testList()
     {
-        factory(Category::class, 1)->create();
+        Category::factory(1)->create();
         $categories = Category::all();
         $this->assertCount(1, $categories);
 
@@ -48,7 +48,7 @@ class CategoryTest extends TestCase
 
     public function testUpdate()
     {
-        $category = factory(Category::class)->create([
+        $category = Category::factory()->create([
             'is_active' => false
         ]);
 
@@ -67,7 +67,7 @@ class CategoryTest extends TestCase
     public function testDelete()
     {
         /** @var Category $category */
-        $category = factory(Category::class)->create();
+        $category = Category::factory()->create();
         $category->delete();
         $this->assertNull(Category::find($category->id));
         $this->assertNull(Category::first());

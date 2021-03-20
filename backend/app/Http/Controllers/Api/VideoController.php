@@ -53,6 +53,7 @@ class VideoController extends BasicCrudController
         $validatedData = $this->validate($request, $this->rulesUpdate());
         $video->update($validatedData);
         $resource = $this->resource();
+        $video = $this->queryBuilder()->findOrFail($video->id);
 
         return new $resource($video);
     }

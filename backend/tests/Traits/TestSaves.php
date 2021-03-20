@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Tests\Traits;
 
-use Illuminate\Foundation\Testing\TestResponse;
+use Illuminate\Testing\TestResponse;
 
 trait TestSaves
 {

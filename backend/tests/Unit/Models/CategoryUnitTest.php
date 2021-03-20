@@ -3,8 +3,9 @@
 namespace Tests\Unit\Models;
 
 use App\Models\Category;
-use App\Models\Traits\UuidModel;
+use App\Models\UuidModel;
 use EloquentFilter\Filterable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Tests\TestCase;
 
@@ -32,7 +33,7 @@ class CategoryUnitTest extends TestCase
 
     public function testDates()
     {
-        $dates = ['deleted_at', 'created_at', 'updated_at'];
+        $dates = ['created_at', 'updated_at'];
         $this->assertEqualsCanonicalizing($dates, $this->category->getDates());
         $this->assertCount(count($dates), $this->category->getDates());
     }
@@ -42,12 +43,19 @@ class CategoryUnitTest extends TestCase
         $traits = [
             SoftDeletes::class,
             Filterable::class,
+            HasFactory::class,
         ];
         $this->assertEqualsCanonicalizing($traits, array_keys(class_uses(Category::class)));
     }
 
     public function testCasts()
     {
-        $this->assertEqualsCanonicalizing(['is_active' => 'bool'], $this->category->getCasts());
+        $casts = [
+            'is_active' => 'bool',
+            'deleted_at' => 'datetime',
+        ];
+        foreach ($casts as $key => $type) {
+            $this->assertTrue($this->category->hasCast($key, $type));
+        }
     }
 }

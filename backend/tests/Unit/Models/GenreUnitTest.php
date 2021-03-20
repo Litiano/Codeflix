@@ -3,8 +3,9 @@
 namespace Tests\Unit\Models;
 
 use App\Models\Genre;
-use App\Models\Traits\UuidModel;
+use App\Models\UuidModel;
 use EloquentFilter\Filterable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use PHPUnit\Framework\TestCase;
 
@@ -32,7 +33,7 @@ class GenreUnitTest extends TestCase
 
     public function testDates()
     {
-        $dates = ['deleted_at', 'created_at', 'updated_at'];
+        $dates = ['created_at', 'updated_at'];
         $this->assertEqualsCanonicalizing($dates, $this->genre->getDates());
         $this->assertCount(count($dates), $this->genre->getDates());
     }
@@ -42,12 +43,16 @@ class GenreUnitTest extends TestCase
         $traits = [
             SoftDeletes::class,
             Filterable::class,
+            HasFactory::class,
         ];
         $this->assertEquals($traits, array_keys(class_uses(Genre::class)));
     }
 
     public function testCasts()
     {
-        $this->assertEqualsCanonicalizing(['is_active' => 'bool'], $this->genre->getCasts());
+        $casts = ['is_active' => 'bool', 'deleted_at' => 'datetime'];
+        foreach ($casts as $key => $type) {
+            $this->assertTrue($this->genre->hasCast($key, $type));
+        }
     }
 }

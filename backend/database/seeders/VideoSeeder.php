@@ -1,11 +1,14 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Models\CastMember;
 use App\Models\Genre;
 use App\Models\Video;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class VideoSeeder extends Seeder
 {
@@ -29,7 +32,7 @@ class VideoSeeder extends Seeder
         $this->allCastMembers = CastMember::all();
         Model::reguard();
 
-        factory(Video::class, 100)
+        Video::factory()->count(100)
             ->make()
             ->each(function (Video $video) {
                 $this->fetchRelations();
@@ -45,7 +48,8 @@ class VideoSeeder extends Seeder
                         $this->relations
                     )
                 );
-            });
+            })
+        ;
         Model::unguard();
     }
 

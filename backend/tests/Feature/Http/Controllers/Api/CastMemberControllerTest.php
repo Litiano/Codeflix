@@ -90,7 +90,7 @@ class CastMemberControllerTest extends TestCase
 
     public function testUpdate()
     {
-        $this->castMember = factory(CastMember::class)->create([
+        $this->castMember = CastMember::factory()->create([
             'type' => CastMember::TYPE_DIRECTOR,
         ]);
         $data = ['type' => CastMember::TYPE_ACTOR, 'name' => 'test'];
@@ -121,7 +121,7 @@ class CastMemberControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->castMember = factory(CastMember::class)->create(['type' => CastMember::TYPE_DIRECTOR]);
+        $this->castMember = CastMember::factory()->create(['type' => CastMember::TYPE_DIRECTOR]);
     }
 
     protected function routeStore(): string

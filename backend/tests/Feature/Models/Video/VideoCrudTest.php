@@ -23,7 +23,7 @@ class VideoCrudTest extends BaseVideoTestCase
 
     public function testList()
     {
-        factory(Video::class)->create();
+        Video::factory()->create();
         $videos = Video::all();
         $this->assertCount(1, $videos);
         $videoKeys = array_keys($videos->first()->getAttributes());
@@ -62,8 +62,8 @@ class VideoCrudTest extends BaseVideoTestCase
 
     public function testCreateWithRelations()
     {
-        $category = factory(Category::class)->create();
-        $genre = factory(Genre::class)->create();
+        $category = Category::factory()->create();
+        $genre = Genre::factory()->create();
         $video = Video::create(
             $this->data + [
                 'categories_id' => [$category->id],
@@ -110,7 +110,7 @@ class VideoCrudTest extends BaseVideoTestCase
 
     public function testRollbackUpdate()
     {
-        $video = factory(Video::class)->create();
+        $video = Video::factory()->create();
         $oldTitle = $video->title;
         $hasError = false;
         try {
@@ -147,9 +147,9 @@ class VideoCrudTest extends BaseVideoTestCase
 
     public function testUpdateWithRelations()
     {
-        $category = factory(Category::class)->create();
-        $genre = factory(Genre::class)->create();
-        $video = factory(Video::class)->create();
+        $category = Category::factory()->create();
+        $genre = Genre::factory()->create();
+        $video = Video::factory()->create();
         $video->update([
             'categories_id' => [$category->id],
             'genres_id' => [$genre->id],
@@ -161,17 +161,17 @@ class VideoCrudTest extends BaseVideoTestCase
 
     public function testHandleRelations()
     {
-        $video = factory(Video::class)->create();
+        $video = Video::factory()->create();
         Video::handleRelations($video, []);
         $this->assertCount(0, $video->categories);
         $this->assertCount(0, $video->genres);
 
-        $category = factory(Category::class)->create();
+        $category = Category::factory()->create();
         Video::handleRelations($video, ['categories_id' => [$category->id]]);
         $video->refresh();
         $this->assertCount(1, $video->categories);
 
-        $genre = factory(Genre::class)->create();
+        $genre = Genre::factory()->create();
         Video::handleRelations($video, ['genres_id' => [$genre->id]]);
         $video->refresh();
         $this->assertCount(1, $video->genres);
@@ -199,8 +199,8 @@ class VideoCrudTest extends BaseVideoTestCase
 
     public function testSyncCategories()
     {
-        $categoriesId = factory(Category::class, 3)->create()->pluck('id')->toArray();
-        $video = factory(Video::class)->create();
+        $categoriesId = Category::factory(3)->create()->pluck('id')->toArray();
+        $video = Video::factory()->create();
         Video::handleRelations($video, ['categories_id' => $categoriesId[0]]);
         $this->assertDatabaseHas('category_video', [
             'category_id' => $categoriesId[0],
@@ -227,9 +227,9 @@ class VideoCrudTest extends BaseVideoTestCase
     public function testSyncGenres()
     {
         /** @var Collection|Genre[] $genres */
-        $genres = factory(Genre::class, 3)->create();
+        $genres = Genre::factory(3)->create();
         $genresId = $genres->pluck('id')->toArray();
-        $video = factory(Video::class)->create();
+        $video = Video::factory()->create();
         Video::handleRelations($video, ['genres_id' => $genresId[0]]);
         $this->assertDatabaseHas('genre_video', [
             'genre_id' => $genresId[0],

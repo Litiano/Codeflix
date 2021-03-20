@@ -151,7 +151,7 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
         $this->assertInvalidationStoreAction($data, 'exists');
         $this->assertInvalidationUpdateAction($data, 'exists');
 
-        $category = factory(Category::class)->create();
+        $category = Category::factory()->create();
         $category->delete();
         $data = ['categories_id' => [$category->id]];
         $this->assertInvalidationStoreAction($data, 'exists');
@@ -168,7 +168,7 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
         $this->assertInvalidationStoreAction($data, 'exists');
         $this->assertInvalidationUpdateAction($data, 'exists');
 
-        $genre = factory(Genre::class)->create();
+        $genre = Genre::factory()->create();
         $genre->delete();
         $data = ['genres_id' => [$genre->id]];
         $this->assertInvalidationStoreAction($data, 'exists');
