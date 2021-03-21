@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Models\Traits\UploadFiles;
-use App\Models\UuidModel;
 use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -36,6 +35,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property null|string                                                       $thumb_file_url
  * @property null|string                                                       $trailer_file_url
  * @property null|string                                                       $video_file_url
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|Video filter(array $input = [], $filter = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Video newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Video newQuery()
@@ -63,6 +63,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Query\Builder|Video withTrashed()
  * @method static \Illuminate\Database\Query\Builder|Video withoutTrashed()
  * @mixin \Eloquent
+ *
  * @method static \Database\Factories\VideoFactory factory(...$parameters)
  */
 class Video extends UuidModel

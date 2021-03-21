@@ -6,9 +6,7 @@ use App\Http\Resources\VideoResource;
 use App\Models\Video;
 use App\Rules\GenresHasCategoriesRule;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 
 class VideoController extends BasicCrudController
 {
@@ -48,12 +46,12 @@ class VideoController extends BasicCrudController
     public function update(Request $request, $id)
     {
         $this->addRulesIfGenresHasCategories($request);
-        /** @var Video $video */
-        $video = $this->findOrFail($id);
+        $video = $this->model()::findOrFail($id);
+        //$video = $this->findOrFail($id);
         $validatedData = $this->validate($request, $this->rulesUpdate());
         $video->update($validatedData);
         $resource = $this->resource();
-        $video = $this->queryBuilder()->findOrFail($video->id);
+        $video->refresh();
 
         return new $resource($video);
     }
@@ -65,7 +63,7 @@ class VideoController extends BasicCrudController
         $this->rules['genres_id'][] = new GenresHasCategoriesRule($categoriesId);
     }
 
-    protected function model(): string | Model
+    protected function model(): string | Video
     {
         return Video::class;
     }
