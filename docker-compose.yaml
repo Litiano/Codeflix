@@ -47,6 +47,8 @@ services:
       - .docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
     environment:
       - PHP_IDE_CONFIG=serverName=localhost
+    extra_hosts:
+      - host.docker.internal:host-gateway
     entrypoint: dockerize -wait tcp://mysql:3306 -timeout 40s php-fpm
     depends_on:
       - mysql
