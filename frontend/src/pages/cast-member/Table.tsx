@@ -13,7 +13,9 @@ import useFilter from "../../hooks/useFilter";
 import * as yup from '../../utils/vendor/yup';
 import {invert} from 'lodash';
 import {FilterResetButton} from "../../components/Table/FilterResetButton";
- import LoadingContext from "../../components/loading/LoadingContext";
+import LoadingContext from "../../components/loading/LoadingContext";
+import useDeleteCollection from "../../hooks/useDeleteCollection";
+ import DeleteDialog from "../../components/DeleteDialog";
 
 const castMemberNames = Object.values(CastMemberTypeMap);
 
@@ -91,6 +93,7 @@ const Table = (props: Props) => {
     const loading = useContext(LoadingContext);
     const tableRef = useRef() as React.MutableRefObject<MuiDataTableRefComponent>;
     const subscribed = useRef(true);
+    const {openDeleteDialog, setOpenDeleteDialog, rowsToDelete, setRowsToDelete} = useDeleteCollection();
 
     const {
         columns,
@@ -179,6 +182,7 @@ const Table = (props: Props) => {
             });
             setData(data.data);
             setTotalRecords(data.meta.total);
+            setOpenDeleteDialog(false);
         } catch (error) {
             if (castMemberHttp.isCancelRequest(error)) {
                 return;
@@ -188,8 +192,33 @@ const Table = (props: Props) => {
         }
     }
 
+    function deleteRows(confirmed: boolean) {
+        if (!confirmed) {
+            setOpenDeleteDialog(false);
+            return;
+        }
+        const ids = rowsToDelete.data
+            .map((value) => data[value.index].id)
+            .join(',');
+        castMemberHttp.deleteCollection({ids})
+            .then((response) => {
+                snackbar.enqueueSnackbar('Registros excluídos com sucesso!', {variant: 'success'});
+                const page = filterState.pagination.page;
+
+                if (rowsToDelete.data.length === data.length && page > 1) {
+                    filterManager.changePage(page - 2)
+                } else {
+                    getData();
+                }
+            }).catch((error) => {
+            console.error(error);
+            snackbar.enqueueSnackbar('Não foi possível excluir os registros', {variant: 'error'});
+        });
+    }
+
     return (
         <MuiThemeProvider theme={makeActionStyles(columnsDefinition.length - 1)}>
+            <DeleteDialog open={openDeleteDialog} handleClose={deleteRows}/>
             <DefaultTable
                 columns={columnsDefinition}
                 title='Listagem de membros'
@@ -215,7 +244,11 @@ const Table = (props: Props) => {
                     onSearchChange: (value) => filterManager.changeSearch(value),
                     onChangePage: (page) => filterManager.changePage(page),
                     onChangeRowsPerPage: (perPage) => filterManager.changeRowsPerPage(perPage),
-                    onColumnSortChange: (changedColumn, direction) => filterManager.changeColumnSort(changedColumn, direction)
+                    onColumnSortChange: (changedColumn, direction) => filterManager.changeColumnSort(changedColumn, direction),
+                    onRowsDelete: (rowsDeleted) => {
+                        setRowsToDelete(rowsDeleted);
+                        return false;
+                    },
                 }}
             />
         </MuiThemeProvider>

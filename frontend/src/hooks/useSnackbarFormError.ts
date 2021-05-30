@@ -10,11 +10,11 @@ const useSnackbarFormError = (submitCount, errors) => {
                 'Formulário inválido. Reveja os campos marcados em vermelho.',
                 {variant: 'error'}
             );
-            for (let key in errors) {
-                if (errors.hasOwnProperty(key) && errors[key].message) {
-                    snackbar.enqueueSnackbar(errors[key].message, {variant: 'error'});
-                }
-            }
+            // for (let key in errors) {
+            //     if (errors.hasOwnProperty(key) && errors[key].message) {
+            //         snackbar.enqueueSnackbar(errors[key].message, {variant: 'error'});
+            //     }
+            // }
         }
     }, [submitCount]); // eslint-disable-line
 }

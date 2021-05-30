@@ -33,7 +33,17 @@ export const Form = () => {
     const [, setCastMember] = useState<CastMember | null>(null);
     const loading = useContext(LoadingContext);
 
-    const {register, handleSubmit, getValues, setValue, errors, reset, watch, trigger, formState} = useForm({
+    const {
+        register,
+        handleSubmit,
+        getValues,
+        setValue,
+        errors,
+        reset,
+        watch,
+        trigger,
+        formState
+    } = useForm({
         resolver: yupResolver(validationSchema),
         defaultValues: {
             name: '',
@@ -88,7 +98,9 @@ export const Form = () => {
     }
 
     return (
-        <DefaultForm onSubmit={handleSubmit(onSubmit)} GridItemProps={{xs: 12, md: 6}}>
+        <DefaultForm
+            onSubmit={handleSubmit(onSubmit)}
+            GridItemProps={{xs: 12, md: 6}}>
             <TextField
                 name={'name'}
                 label={'Nome'}
@@ -124,6 +136,7 @@ export const Form = () => {
             <SubmitActions disabledButtons={loading}
                            handleSave={
                                async () => {
+                                   formState.submitCount++;
                                    const result = await trigger();
                                    if (result) {
                                        await onSubmit(getValues(), null)

@@ -28,7 +28,17 @@ export const Form = () => {
     const history = useHistory();
     const snackbar = useSnackbar();
 
-    const {register, handleSubmit, getValues, setValue, errors, reset, watch, trigger, formState} = useForm({
+    const {
+        register,
+        handleSubmit,
+        getValues,
+        setValue,
+        errors,
+        reset,
+        watch,
+        trigger,
+        formState
+    } = useForm({
         resolver: yupResolver(validationSchema),
         defaultValues: {
             is_active: true,
@@ -126,6 +136,7 @@ export const Form = () => {
             <SubmitActions disabledButtons={loading}
                            handleSave={
                                async () => {
+                                   formState.submitCount++;
                                    const result = await trigger();
                                    if (result) {
                                        await onSubmit(getValues(), null)

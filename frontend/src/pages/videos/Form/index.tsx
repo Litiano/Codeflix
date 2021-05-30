@@ -10,7 +10,7 @@ import {DefaultForm} from "../../../components/DefaultForm";
 import {
     Card, CardContent,
     Checkbox,
-    FormControlLabel, FormHelperText,
+    FormControlLabel,
     Grid,
     TextField,
     Typography,
@@ -24,12 +24,16 @@ import {Theme} from "@material-ui/core/styles";
 import {makeStyles} from "@material-ui/styles";
 import GenreField, {GenreFieldComponent} from "./GenreField";
 import CategoryField, {CategoryFieldComponent} from "./CategoryField";
-import {map, omit, zipObject} from 'lodash';
+import {omit, zipObject} from 'lodash';
 import CastMemberField, {CastMemberFieldComponent} from "./CastMemberField";
 import {getCategoriesFromGenre} from "../../../utils/model-filter";
 import {InputFileComponent} from "../../../components/InputFile";
 import useSnackbarFormError from "../../../hooks/useSnackbarFormError";
 import LoadingContext from "../../../components/loading/LoadingContext";
+import {useDispatch} from "react-redux";
+import {FileInfo} from "../../../store/upload/types";
+import {Creators} from "../../../store/upload";
+import SnackbarUpload from "../../../components/SnackbarUpload";
 
 const useStyles = makeStyles((theme: Theme) => ({
     cardUpload: {
@@ -55,6 +59,7 @@ export const Form = () => {
     const loading = useContext(LoadingContext);
     const [video, setVideo] = useState<Video | null>(null);
     const theme = useTheme();
+    const dispatch = useDispatch();
     const isGreaterMd = useMediaQuery(theme.breakpoints.up('md'));
     const classes = useStyles();
     const castMemberRef = useRef() as MutableRefObject<CastMemberFieldComponent>;
@@ -156,14 +161,16 @@ export const Form = () => {
 
     async function onSubmit(formData, event) {
         try {
-            formData.categories_id = map(formData.categories, 'id');
-            formData.genres_id = map(formData.genres, 'id');
-            formData.cast_members_id = map(formData.cast_members, 'id');
-            formData = omit(formData, ['categories', 'genres', 'cast_members']);
+            const sendData = omit(formData, ['categories', 'genres', 'cast_members', ...fileFields]);
+            sendData['categories_id'] = formData.categories.map(category => category.id);
+            sendData['genres_id'] = formData.genres.map(genre => genre.id);
+            sendData['cast_members_id'] = formData.cast_members.map(castMember => castMember.id);
 
-            const http = id ? videoHttp.update(id, formData) : videoHttp.create(formData);
+            const http = id ? videoHttp.update(id, sendData) : videoHttp.create(sendData);
             const {data} = await http;
             snackbar.enqueueSnackbar('Vídeo salvo com sucesso!', {variant: 'success'});
+            setVideo(data.data);
+            uploadFiles(data.data);
             id && resetForm(video);
             setTimeout(() => {
                 if (event) {
@@ -190,6 +197,31 @@ export const Form = () => {
         genreRef.current.clear();
         categoryRef.current.clear();
         reset(data);
+    }
+
+    function uploadFiles(video: Video) {
+        const files: FileInfo[] = fileFields
+            .filter(fileField => getValues()[fileField])
+            .map(fileField => ({fileField, file: getValues()[fileField]}));
+
+        if (!files.length) {
+            return;
+        }
+
+        dispatch(Creators.addUpload({video, files}));
+
+        snackbar.enqueueSnackbar('', {
+            key: 'snackbar-upload',
+            persist: true,
+            anchorOrigin: {
+                vertical: 'bottom',
+                horizontal: 'right',
+            },
+            content: (key, message) => {
+                const id = key as any;
+                return <SnackbarUpload id={id}/>
+            },
+        });
     }
 
     return (
@@ -294,14 +326,6 @@ export const Form = () => {
                                 }
                             />
                         </Grid>
-                        <Grid item xs={12}>
-                            <FormHelperText>
-                                Escolha os gêneros do vídeo
-                            </FormHelperText>
-                            <FormHelperText>
-                                Escolha pelo menos uma categoria de cada gênero
-                            </FormHelperText>
-                        </Grid>
                     </Grid>
                 </Grid>
                 <Grid item xs={12} md={6}>
@@ -381,6 +405,7 @@ export const Form = () => {
             <SubmitActions disabledButtons={loading}
                            handleSave={
                                async () => {
+                                   formState.submitCount++;
                                    const result = await trigger();
                                    if (result) {
                                        await onSubmit(getValues(), null)

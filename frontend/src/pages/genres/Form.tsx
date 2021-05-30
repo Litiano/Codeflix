@@ -32,7 +32,17 @@ export const Form = () => {
     const {id} = useParams();
     const [, setGenre] = useState<Genre | null>(null);
 
-    const {register, handleSubmit, getValues, setValue, errors, reset, watch, trigger, formState} = useForm({
+    const {
+        register,
+        handleSubmit,
+        getValues,
+        setValue,
+        errors,
+        reset,
+        watch,
+        trigger,
+        formState
+    } = useForm({
         resolver: yupResolver(validationSchema),
         defaultValues: {
             name: '',
@@ -147,6 +157,7 @@ export const Form = () => {
             <SubmitActions disabledButtons={loading}
                            handleSave={
                                async () => {
+                                   formState.submitCount++;
                                    const result = await trigger();
                                    if (result) {
                                        await onSubmit(getValues(), null)

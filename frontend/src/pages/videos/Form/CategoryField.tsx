@@ -3,7 +3,7 @@ import * as React from 'react';
 import AsyncAutocomplete, {AsyncAutocompleteComponent} from "../../../components/AsyncAutocomplete";
 import GridSelected from "../../../components/GridSelected";
 import GridSelectedItem from "../../../components/GridSelectedItem";
-import {FormControl, FormControlProps, FormHelperText, Typography, makeStyles} from "@material-ui/core";
+import {FormControl, FormControlProps, FormHelperText, Typography, makeStyles, useTheme} from "@material-ui/core";
 import useHttpHandled from "../../../hooks/useHttpHandled";
 import useCollectionManager from "../../../hooks/useCollectionManager";
 import {Category, Genre} from "../../../utils/models";
@@ -38,6 +38,7 @@ export const CategoryField = React.forwardRef<CategoryFieldComponent, CategoryFi
     const {addItem, removeItem} = useCollectionManager(categories, setCategories);
     const classes = useStyle();
     const autocompleteRef = useRef() as MutableRefObject<AsyncAutocompleteComponent>;
+    const theme = useTheme();
 
     function fetchOptions(searchText) {
         return autocompleteHttp(
@@ -71,6 +72,9 @@ export const CategoryField = React.forwardRef<CategoryFieldComponent, CategoryFi
                 }}
             />
 
+            <FormHelperText style={{height: theme.spacing(3)}}>
+                Escolha ao menos uma categoria de cada gênero
+            </FormHelperText>
             <FormControl
                 fullWidth
                 margin={'normal'}

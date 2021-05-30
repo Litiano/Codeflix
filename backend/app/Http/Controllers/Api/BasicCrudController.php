@@ -53,7 +53,10 @@ abstract class BasicCrudController extends Controller
     public function update(Request $request, $id)
     {
         $model = $this->findOrFail($id);
-        $validatedData = $this->validate($request, $this->rulesUpdate());
+        $validatedData = $this->validate(
+            $request,
+            $request->isMethod('PATCH') ? $this->rulesPatch() : $this->rulesUpdate()
+        );
         $model->update($validatedData);
         $resource = $this->resource();
 
@@ -92,6 +95,23 @@ abstract class BasicCrudController extends Controller
     abstract protected function rulesStore(): array;
 
     abstract protected function rulesUpdate(): array;
+
+    protected function rulesPatch(): array
+    {
+        return array_map(function ($rules) {
+            if (is_array($rules) && in_array('required', $rules)) {
+                array_unshift($rules, 'sometimes');
+            } elseif (is_string($rules)) {
+                $rules = explode('|', $rules);
+                if (in_array('required', $rules)) {
+                    array_unshift($rules, 'sometimes');
+                }
+                $rules = implode('|', $rules);
+            }
+
+            return $rules;
+        }, $this->rulesUpdate());
+    }
 
     abstract protected function resourceCollection(): string | JsonResource;
 

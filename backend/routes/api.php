@@ -32,4 +32,5 @@ Route::group(['namespace' => 'Api', 'as' => 'api.'], function () {
 
     Route::resource('videos', 'VideoController', $exceptCreatEdit);
     Route::delete('videos', 'VideoController@destroyCollection');
+    Route::resource('videos.uploads', 'VideoUploadController');
 });

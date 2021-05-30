@@ -37,7 +37,7 @@ class VideoController extends BasicCrudController
         $validatedData = $this->validate($request, $this->rulesStore());
         /** @var Video $video */
         $video = $this->model()::create($validatedData);
-        $video->refresh();
+        $video = $this->findOrFail($video->id);
         $resource = $this->resource();
 
         return new $resource($video);
@@ -48,10 +48,13 @@ class VideoController extends BasicCrudController
         $this->addRulesIfGenresHasCategories($request);
         $video = $this->model()::findOrFail($id);
         //$video = $this->findOrFail($id);
-        $validatedData = $this->validate($request, $this->rulesUpdate());
+        $validatedData = $this->validate(
+            $request,
+            $request->isMethod('PATCH') ? $this->rulesPatch() : $this->rulesUpdate()
+        );
         $video->update($validatedData);
         $resource = $this->resource();
-        $video->refresh();
+        $video = $this->findOrFail($video->id);
 
         return new $resource($video);
     }

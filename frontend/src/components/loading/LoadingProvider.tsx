@@ -15,7 +15,7 @@ export const LoadingProvider = (props) => {
     useMemo(() => {
         let isSubscribed = true;
         const requestIds = addGlobalRequestInterceptor((config) => {
-            if (isSubscribed) {
+            if (isSubscribed && !ignoreLoading(config.headers)) {
                 setLoading(true);
                 setCountRequest((prevCountRequest => prevCountRequest + 1));
             }
@@ -23,12 +23,12 @@ export const LoadingProvider = (props) => {
         });
 
         const responseIds = addGlobalResponseInterceptor((response) => {
-            if (isSubscribed) {
+            if (isSubscribed && !ignoreLoading(response?.config?.headers)) {
                 decrementCountRequest();
             }
             return response;
         }, (error) => {
-            if (isSubscribed) {
+            if (isSubscribed && !ignoreLoading(error?.config?.headers)) {
                 decrementCountRequest();
             }
             return Promise.reject(error);
@@ -40,6 +40,10 @@ export const LoadingProvider = (props) => {
             removeGlobalResponseInterceptor(responseIds);
         }
     }, [true]); // eslint-disable-line
+
+    function ignoreLoading(headers: object|undefined): boolean {
+        return headers && headers.hasOwnProperty('x-ignore-loading') && headers['x-ignore-loading'];
+    }
 
     function decrementCountRequest() {
         setCountRequest((prevCountRequest => prevCountRequest - 1));

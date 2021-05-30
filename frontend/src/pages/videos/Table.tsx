@@ -313,7 +313,7 @@ const Table = (props: Props) => {
                     onRowsDelete: (rowsDeleted) => {
                         setRowsToDelete(rowsDeleted);
                         return false;
-                    }
+                    },
                 }}
             />
         </MuiThemeProvider>

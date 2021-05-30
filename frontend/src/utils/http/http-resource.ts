@@ -35,10 +35,16 @@ export default class HttpResource {
         return this.http.post<T>(this.resource, data);
     }
 
-    update<T = any>(id: number | string, data): Promise<AxiosResponse<T>> {
+    update<T = any>(id: number | string, data, options?: {config?: AxiosRequestConfig}): Promise<AxiosResponse<T>> {
         data._method = 'PUT';
         data = this.makeSendData(data);
-        return this.http.post<T>(this.resource + '/' + id, data);
+        return this.http.post<T>(this.resource + '/' + id, data, options?.config);
+    }
+
+    partialUpdate<T = any>(id: number | string, data, options?: {config?: AxiosRequestConfig}): Promise<AxiosResponse<T>> {
+        data._method = 'PATCH';
+        data = this.makeSendData(data);
+        return this.http.post<T>(this.resource + '/' + id, data, options?.config);
     }
 
     delete<T = any>(id: number | string): Promise<AxiosResponse<T>> {
