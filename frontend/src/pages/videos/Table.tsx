@@ -164,7 +164,7 @@ const Table = (props: Props) => {
         tableRef,
         extraFilter
     });
-    const searchText = cleanSearchText(filterState.search);
+    const searchText = cleanSearchText(debouncedFilterState.search);
 
     const indexColumnCategories = columns.findIndex(c => c.name === 'categories');
     const columnCategories = columns[indexColumnCategories];

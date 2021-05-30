@@ -144,7 +144,7 @@ const Table = (props: Props) => {
         extraFilter
     });
 
-    const searchText = cleanSearchText(filterState.search);
+    const searchText = cleanSearchText(debouncedFilterState.search);
     const indexColumnType = columns.findIndex(c => c.name === 'type');
     const columnType = columns[indexColumnType];
     const typeFilterValue = filterState.extraFilter && filterState.extraFilter.type as never;

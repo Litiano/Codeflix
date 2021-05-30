@@ -175,7 +175,7 @@ const Table = (props: Props) => {
     const isActiveFilterValue = filterState.extraFilter && filterState.extraFilter.is_active as never;
     (columnIsActive.options as any).filterList = isActiveFilterValue ? [isActiveFilterValue] : [];
 
-    const searchText = cleanSearchText(filterState.search);
+    const searchText = cleanSearchText(debouncedFilterState.search);
 
     const getData = useCallback(async ({search, page, per_page, sort, dir, categories, is_active}) => {
         try {
