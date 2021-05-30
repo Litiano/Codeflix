@@ -21,7 +21,7 @@ steps:
 
   - id: 'Rodando chown'
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', '-u', 'root', 'php', 'chown', '-R', 'www-data:www-data', '.']
+    args: ['exec', '-t', '-u', 'root', '-w', '/var/www/html/backend', 'php', 'chown', '-R', 'www-data:www-data', '.']
 
   - id: 'Rodando composer'
     name: 'gcr.io/cloud-builders/docker'
