@@ -43,6 +43,14 @@ steps:
     name: 'gcr.io/cloud-builders/docker'
     args: [ 'exec', '-t', '-w', '/var/www/html/backend', 'php', 'ls', '-la']
 
+  - id: 'Rodando ls -la 2'
+    name: 'gcr.io/cloud-builders/docker'
+    args: [ 'exec', '-t', '-w', '/var/www/html/.docker', 'php', 'ls', '-la' ]
+
+  - id: 'Rodando ls -la 3'
+    name: 'gcr.io/cloud-builders/docker'
+    args: [ 'exec', '-t', '-w', '/var/www/html/.docker/mysql', 'php', 'ls', '-la' ]
+
   - id: 'Rodando migrations'
     name: 'gcr.io/cloud-builders/docker'
     args: ['exec', '-t', '-w', '/var/www/html/backend', 'php', 'php', 'artisan', 'migrate']
