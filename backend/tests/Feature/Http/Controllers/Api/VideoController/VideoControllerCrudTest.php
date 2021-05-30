@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Tests\Feature\Http\Controllers\Api\VideoController;
 
 use App\Http\Resources\VideoResource;
@@ -9,6 +8,10 @@ use App\Models\Genre;
 use App\Models\Video;
 use Illuminate\Support\Arr;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class VideoControllerCrudTest extends BaseVideoControllerTestCase
 {
     private array $fieldsSerialized = [
@@ -35,7 +38,7 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
                 'created_at',
                 'updated_at',
                 'deleted_at',
-            ]
+            ],
         ],
         'genres' => [
             '*' => [
@@ -45,7 +48,7 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
                 'created_at',
                 'updated_at',
                 'deleted_at',
-            ]
+            ],
         ],
         'cast_members' => [
             '*' => [
@@ -55,8 +58,8 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
                 'created_at',
                 'updated_at',
                 'deleted_at',
-            ]
-        ]
+            ],
+        ],
     ];
 
     public function testIndex()
@@ -67,11 +70,12 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
             ->assertJson(['data' => [$this->video->toArray()]])
             ->assertJsonStructure([
                 'data' => [
-                    '*' => $this->fieldsSerialized
+                    '*' => $this->fieldsSerialized,
                 ],
                 'meta' => [],
                 'links' => [],
-            ]);
+            ])
+        ;
         $this->assertResource($response, VideoResource::collection([$this->video]));
     }
 
@@ -82,8 +86,9 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
         $response->assertStatus(200)
             ->assertJson(['data' => $this->video->toArray()])
             ->assertJsonStructure([
-                'data' => $this->fieldsSerialized
-            ]);
+                'data' => $this->fieldsSerialized,
+            ])
+        ;
 
         $id = $this->getIdFromResponse($response);
         $video = Video::find($id);
@@ -181,19 +186,19 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
         $data = [
             [
                 'send_data' => $this->sendData,
-                'test_data' => $testData + ['opened' => false]
+                'test_data' => $testData + ['opened' => false],
             ],
             [
                 'send_data' => $this->sendData + [
-                        'opened' => true,
-                    ],
-                'test_data' => $testData + ['opened' => true]
+                    'opened' => true,
+                ],
+                'test_data' => $testData + ['opened' => true],
             ],
             [
                 'send_data' => $this->sendData + [
-                        'rating' => Video::RATING_LIST[1],
-                    ],
-                'test_data' => $testData + ['rating' => Video::RATING_LIST[1]]
+                    'rating' => Video::RATING_LIST[1],
+                ],
+                'test_data' => $testData + ['rating' => Video::RATING_LIST[1]],
             ],
         ];
 
