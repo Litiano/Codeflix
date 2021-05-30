@@ -4,8 +4,8 @@ steps:
     args:
       - kms
       - decrypt
-      - --ciphertext-file=./storage/credentials/google/service-account-storage.json.enc
-      - --plaintext-file=./storage/credentials/google/service-account-storage.json
+      - --ciphertext-file=./backend/storage/credentials/google/service-account-storage.json.enc
+      - --plaintext-file=./backend/storage/credentials/google/service-account-storage.json
       - --location=global
       - --keyring=testing-lesson
       - --key=service-account
@@ -25,28 +25,28 @@ steps:
 
   - id: 'Rodando composer'
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', 'php', 'composer', 'install']
+    args: ['exec', '-t', '-w', '/var/www/html/backend', 'php', 'composer', 'install']
 
   - id: 'Copiando .env'
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', 'php', 'cp', '.env.example', '.env']
+    args: ['exec', '-t', '-w', '/var/www/html/backend', 'php', 'cp', '.env.example', '.env']
 
   - id: 'Copiando .env.testing'
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', 'php', 'cp', '.env.testing.example', '.env.testing']
+    args: ['exec', '-t', '-w', '/var/www/html/backend', 'php', 'cp', '.env.testing.example', '.env.testing']
 
   - id: 'Rodando key:generate'
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', 'php', 'php', 'artisan', 'key:generate']
+    args: ['exec', '-t', '-w', '/var/www/html/backend', 'php', 'php', 'artisan', 'key:generate']
 
   - id: 'Rodando migrations'
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', 'php', 'php', 'artisan', 'migrate']
+    args: ['exec', '-t', '-w', '/var/www/html/backend', 'php', 'php', 'artisan', 'migrate']
 
   - id: 'Rodando storage:link'
     name: 'gcr.io/cloud-builders/docker'
-    args: [ 'exec', '-t', 'php', 'php', 'artisan', 'storage:link' ]
+    args: [ 'exec', '-t', '-w', '/var/www/html/backend', 'php', 'php', 'artisan', 'storage:link' ]
 
   - id: 'Rodando PhpUnit'
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', 'php', 'php', 'vendor/bin/phpunit', '-c', 'phpunit.xml']
+    args: ['exec', '-t', '-w', '/var/www/html/backend', 'php', 'php', 'vendor/bin/phpunit', '-c', 'phpunit.xml']
