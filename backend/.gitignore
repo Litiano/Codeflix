@@ -1,6 +1,7 @@
 /node_modules
 /public/hot
 /public/storage
+/public/admin-frontend
 /storage/*.key
 /vendor
 .env
@@ -17,3 +18,4 @@ yarn-error.log
 _ide_helper_models.php
 _ide_helper.php
 .php_cs.cache
+resources/views/admin-frontend/index.html
