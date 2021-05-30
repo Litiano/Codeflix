@@ -37,7 +37,8 @@ class VideoController extends BasicCrudController
         $validatedData = $this->validate($request, $this->rulesStore());
         /** @var Video $video */
         $video = $this->model()::create($validatedData);
-        $video = $this->findOrFail($video->id);
+        $video->refresh();
+        $video->load('genres.categories', 'categories');
         $resource = $this->resource();
 
         return new $resource($video);
