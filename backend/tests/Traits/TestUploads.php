@@ -3,7 +3,6 @@
 
 namespace Tests\Traits;
 
-
 use Illuminate\Http\UploadedFile;
 
 trait TestUploads

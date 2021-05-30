@@ -1,33 +1,25 @@
 import * as React from 'react';
+import {useContext, useEffect, useState} from 'react';
 import {
-    Box,
-    Button,
-    ButtonProps,
-    TextField,
-    Theme,
-    makeStyles,
-    Radio,
     FormControl,
-    FormLabel, RadioGroup, FormControlLabel, FormHelperText
+    FormControlLabel,
+    FormHelperText,
+    FormLabel,
+    Radio,
+    RadioGroup,
+    TextField
 } from "@material-ui/core";
 import {useForm} from "react-hook-form";
 import castMemberHttp from "../../utils/http/cast-member-http";
-import {useEffect, useState} from "react";
 import * as yup from "../../utils/vendor/yup";
 import {yupResolver} from "@hookform/resolvers/yup";
 import {useSnackbar} from "notistack";
 import {useHistory, useParams} from "react-router-dom";
-
-const useStyles = makeStyles((theme: Theme) => {
-    return {
-        submit: {
-            margin: theme.spacing(1),
-        },
-        type: {
-            margin: theme.spacing(1),
-        },
-    }
-});
+import {CastMember} from "../../utils/models";
+import SubmitActions from "../../components/SubmitActions";
+import {DefaultForm} from "../../components/DefaultForm";
+import useSnackbarFormError from "../../hooks/useSnackbarFormError";
+import LoadingContext from "../../components/loading/LoadingContext";
 
 const validationSchema = yup.object().shape({
     name: yup.string().label('Nome').required().max(255),
@@ -35,21 +27,23 @@ const validationSchema = yup.object().shape({
 });
 
 export const Form = () => {
-    const classes = useStyles();
     const snackbar = useSnackbar();
     const history = useHistory();
     const {id} = useParams();
-    const [castMember, setCastMember] = useState<{id: string} | null>(null);
-    const [loading, setLoading] = useState<boolean>(false);
+    const [, setCastMember] = useState<CastMember | null>(null);
+    const loading = useContext(LoadingContext);
 
-    const buttonProps: ButtonProps = {
-        variant: 'contained',
-        className: classes.submit,
-        color: 'secondary',
-        disabled: loading,
-    };
-
-    const {register, handleSubmit, getValues, setValue, errors, reset, watch} = useForm({
+    const {
+        register,
+        handleSubmit,
+        getValues,
+        setValue,
+        errors,
+        reset,
+        watch,
+        trigger,
+        formState
+    } = useForm({
         resolver: yupResolver(validationSchema),
         defaultValues: {
             name: '',
@@ -57,13 +51,14 @@ export const Form = () => {
         }
     });
 
+    useSnackbarFormError(formState.submitCount, errors);
+
     useEffect(() => {
         if (!id) {
             return;
         }
 
-        async function getCastMember() {
-            setLoading(true);
+        (async function getCastMember() {
             try {
                 const {data} = await castMemberHttp.get(id);
                 setCastMember(data.data);
@@ -71,11 +66,9 @@ export const Form = () => {
             } catch (error) {
                 console.error(error);
                 snackbar.enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
-            } finally {
-                setLoading(false);
             }
-        }
-        getCastMember();
+        })();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -83,7 +76,6 @@ export const Form = () => {
     }, [register]);
 
     async function onSubmit(formData, event) {
-        setLoading(true);
         try {
             const http = id ? castMemberHttp.update(id, formData) : castMemberHttp.create(formData);
             const {data} = await http;
@@ -102,13 +94,13 @@ export const Form = () => {
         } catch (error) {
             console.error(error);
             snackbar.enqueueSnackbar('Erro ao salvar membro!', {variant: 'error'});
-        } finally {
-            setLoading(false);
         }
     }
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <DefaultForm
+            onSubmit={handleSubmit(onSubmit)}
+            GridItemProps={{xs: 12, md: 6}}>
             <TextField
                 name={'name'}
                 label={'Nome'}
@@ -141,11 +133,18 @@ export const Form = () => {
                     errors.type && <FormHelperText id={'type-helper-text'}>{errors.type.message}</FormHelperText>
                 }
             </FormControl>
-            <Box dir={'rtl'}>
-                <Button {...buttonProps} onClick={() => onSubmit(getValues(), null)}>Salvar</Button>
-                <Button {...buttonProps} type={'submit'}>Salvar e continuar editando</Button>
-            </Box>
-        </form>
+            <SubmitActions disabledButtons={loading}
+                           handleSave={
+                               async () => {
+                                   formState.submitCount++;
+                                   const result = await trigger();
+                                   if (result) {
+                                       await onSubmit(getValues(), null)
+                                   }
+                               }
+                           }
+            />
+        </DefaultForm>
     );
 };
 

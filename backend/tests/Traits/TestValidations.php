@@ -3,15 +3,14 @@ declare(strict_types=1);
 
 namespace Tests\Traits;
 
-
-use Illuminate\Foundation\Testing\TestResponse;
+use Illuminate\Testing\TestResponse;
 use Lang;
 
 trait TestValidations
 {
-    abstract protected function model():string;
-    abstract protected function routeStore():string;
-    abstract protected function routeUpdate():string;
+    abstract protected function model(): string;
+    abstract protected function routeStore(): string;
+    abstract protected function routeUpdate(): string;
 
     protected function assertInvalidationStoreAction(
         array $data,

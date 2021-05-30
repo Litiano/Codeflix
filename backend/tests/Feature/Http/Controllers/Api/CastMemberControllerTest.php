@@ -90,21 +90,23 @@ class CastMemberControllerTest extends TestCase
 
     public function testUpdate()
     {
-        $this->castMember = factory(CastMember::class)->create([
+        $this->castMember = CastMember::factory()->create([
             'type' => CastMember::TYPE_DIRECTOR,
         ]);
         $data = ['type' => CastMember::TYPE_ACTOR, 'name' => 'test'];
         $response = $this->assertUpdate($data, $data + ['deleted_at' => null]);
         $response->assertJsonStructure(['data' => $this->fieldsSerialized]);
         $this->assertResource(
-            $response, new CastMemberResource(CastMember::find($this->getIdFromResponse($response)))
+            $response,
+            new CastMemberResource(CastMember::find($this->getIdFromResponse($response)))
         );
 
         $data = ['name' => 'test 2', 'type' => CastMember::TYPE_DIRECTOR,];
         $response = $this->assertUpdate($data, $data);
         $response->assertJsonStructure(['data' => $this->fieldsSerialized]);
         $this->assertResource(
-            $response, new CastMemberResource(CastMember::find($this->getIdFromResponse($response)))
+            $response,
+            new CastMemberResource(CastMember::find($this->getIdFromResponse($response)))
         );
     }
 
@@ -119,7 +121,7 @@ class CastMemberControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->castMember = factory(CastMember::class)->create(['type' => CastMember::TYPE_DIRECTOR]);
+        $this->castMember = CastMember::factory()->create(['type' => CastMember::TYPE_DIRECTOR]);
     }
 
     protected function routeStore(): string

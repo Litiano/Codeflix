@@ -9,9 +9,14 @@ use Tests\TestCase;
 use Tests\Traits\TestProd;
 use Tests\Traits\TestStorages;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class UploadFilesProdTest extends TestCase
 {
-    use TestStorages, TestProd;
+    use TestStorages;
+    use TestProd;
     private UploadFilesStub $object;
 
     protected function setUp(): void

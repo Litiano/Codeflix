@@ -3,9 +3,8 @@
 
 namespace Tests\Feature\Http\Controllers\Api\VideoController;
 
-
 use App\Models\Video;
-use Illuminate\Foundation\Testing\TestResponse;
+use Illuminate\Testing\TestResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 

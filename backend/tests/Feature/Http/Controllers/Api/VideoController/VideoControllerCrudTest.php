@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Tests\Feature\Http\Controllers\Api\VideoController;
-
 
 use App\Http\Resources\VideoResource;
 use App\Models\Category;
@@ -10,6 +8,10 @@ use App\Models\Genre;
 use App\Models\Video;
 use Illuminate\Support\Arr;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class VideoControllerCrudTest extends BaseVideoControllerTestCase
 {
     private array $fieldsSerialized = [
@@ -36,7 +38,7 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
                 'created_at',
                 'updated_at',
                 'deleted_at',
-            ]
+            ],
         ],
         'genres' => [
             '*' => [
@@ -46,8 +48,18 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
                 'created_at',
                 'updated_at',
                 'deleted_at',
-            ]
-        ]
+            ],
+        ],
+        'cast_members' => [
+            '*' => [
+                'id',
+                'name',
+                'type',
+                'created_at',
+                'updated_at',
+                'deleted_at',
+            ],
+        ],
     ];
 
     public function testIndex()
@@ -58,11 +70,12 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
             ->assertJson(['data' => [$this->video->toArray()]])
             ->assertJsonStructure([
                 'data' => [
-                    '*' => $this->fieldsSerialized
+                    '*' => $this->fieldsSerialized,
                 ],
                 'meta' => [],
                 'links' => [],
-            ]);
+            ])
+        ;
         $this->assertResource($response, VideoResource::collection([$this->video]));
     }
 
@@ -73,8 +86,9 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
         $response->assertStatus(200)
             ->assertJson(['data' => $this->video->toArray()])
             ->assertJsonStructure([
-                'data' => $this->fieldsSerialized
-            ]);
+                'data' => $this->fieldsSerialized,
+            ])
+        ;
 
         $id = $this->getIdFromResponse($response);
         $video = Video::find($id);
@@ -91,6 +105,7 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
             'duration' => '',
             'categories_id' => '',
             'genres_id' => '',
+            'cast_members_id' => '',
         ];
         $this->assertInvalidationStoreAction($data, 'required');
         $this->assertInvalidationUpdateAction($data, 'required');
@@ -101,7 +116,6 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
         $data = ['title' => str_repeat('a', 256)];
         $this->assertInvalidationStoreAction($data, 'max.string', ['max' => '255']);
         $this->assertInvalidationUpdateAction($data, 'max.string', ['max' => '255']);
-
     }
 
     public function testInvalidationInteger()
@@ -142,7 +156,7 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
         $this->assertInvalidationStoreAction($data, 'exists');
         $this->assertInvalidationUpdateAction($data, 'exists');
 
-        $category = factory(Category::class)->create();
+        $category = Category::factory()->create();
         $category->delete();
         $data = ['categories_id' => [$category->id]];
         $this->assertInvalidationStoreAction($data, 'exists');
@@ -159,7 +173,7 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
         $this->assertInvalidationStoreAction($data, 'exists');
         $this->assertInvalidationUpdateAction($data, 'exists');
 
-        $genre = factory(Genre::class)->create();
+        $genre = Genre::factory()->create();
         $genre->delete();
         $data = ['genres_id' => [$genre->id]];
         $this->assertInvalidationStoreAction($data, 'exists');
@@ -168,23 +182,23 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
 
     public function testSaveWithoutFiles()
     {
-        $testData = Arr::except($this->sendData, ['genres_id', 'categories_id']);
+        $testData = Arr::except($this->sendData, ['genres_id', 'categories_id', 'cast_members_id']);
         $data = [
             [
                 'send_data' => $this->sendData,
-                'test_data' => $testData + ['opened' => false]
+                'test_data' => $testData + ['opened' => false],
             ],
             [
                 'send_data' => $this->sendData + [
-                        'opened' => true,
-                    ],
-                'test_data' => $testData + ['opened' => true]
+                    'opened' => true,
+                ],
+                'test_data' => $testData + ['opened' => true],
             ],
             [
                 'send_data' => $this->sendData + [
-                        'rating' => Video::RATING_LIST[1],
-                    ],
-                'test_data' => $testData + ['rating' => Video::RATING_LIST[1]]
+                    'rating' => Video::RATING_LIST[1],
+                ],
+                'test_data' => $testData + ['rating' => Video::RATING_LIST[1]],
             ],
         ];
 

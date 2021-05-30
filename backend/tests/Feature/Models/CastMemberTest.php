@@ -12,7 +12,7 @@ class CastMemberTest extends TestCase
 
     public function testList()
     {
-        factory(CastMember::class, 1)->create();
+        CastMember::factory(1)->create();
         $categories = CastMember::all();
         $this->assertCount(1, $categories);
 
@@ -33,7 +33,7 @@ class CastMemberTest extends TestCase
 
     public function testUpdate()
     {
-        $castMember = factory(CastMember::class)->create([
+        $castMember = CastMember::factory()->create([
             'type' => CastMember::TYPE_ACTOR
         ]);
 
@@ -52,7 +52,7 @@ class CastMemberTest extends TestCase
     public function testDelete()
     {
         /** @var CastMember $castMember */
-        $castMember = factory(CastMember::class)->create();
+        $castMember = CastMember::factory()->create();
         $castMember->delete();
         $this->assertNull(CastMember::find($castMember->id));
         $this->assertNull(CastMember::first());

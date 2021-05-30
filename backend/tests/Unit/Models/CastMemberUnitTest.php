@@ -3,7 +3,9 @@
 namespace Tests\Unit\Models;
 
 use App\Models\CastMember;
-use App\Models\Traits\UuidModel;
+use App\Models\UuidModel;
+use EloquentFilter\Filterable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Tests\TestCase;
 
@@ -31,7 +33,7 @@ class CastMemberUnitTest extends TestCase
 
     public function testDates()
     {
-        $dates = ['deleted_at', 'created_at', 'updated_at'];
+        $dates = ['created_at', 'updated_at'];
         $this->assertEqualsCanonicalizing($dates, $this->castMember->getDates());
         $this->assertCount(count($dates), $this->castMember->getDates());
     }
@@ -39,13 +41,18 @@ class CastMemberUnitTest extends TestCase
     public function testIfUseTraits()
     {
         $traits = [
-            SoftDeletes::class
+            SoftDeletes::class,
+            Filterable::class,
+            HasFactory::class,
         ];
         $this->assertEquals($traits, array_keys(class_uses(CastMember::class)));
     }
 
     public function testCasts()
     {
-        $this->assertEqualsCanonicalizing([], $this->castMember->getCasts());
+        $casts = ['deleted_at' => 'datetime'];
+        foreach ($casts as $key => $type) {
+            $this->assertTrue($this->castMember->hasCast($key, $type));
+        }
     }
 }

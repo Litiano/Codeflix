@@ -6,6 +6,9 @@ import CastMemberList from "../pages/cast-member/PageList";
 import CastMemberForm from "../pages/cast-member/PageForm";
 import GenresList from "../pages/genres/PageList";
 import GenresForm from "../pages/genres/PageForm";
+import VideosList from "../pages/videos/PageList";
+import VideosForm from "../pages/videos/PageForm";
+import Uploads from "../pages/uploads";
 
 export interface MyRouteProps extends RouteProps {
     name: string;
@@ -18,28 +21,29 @@ const routes: MyRouteProps[] = [
         label: 'Dashboard',
         path: '/',
         component: Dashboard,
-        exact: true
+        exact: true,
     },
+    ///////////////////////////////////////
     {
         name: 'categories.list',
         label: 'Listar Categorias',
         path: '/categories',
         component: CategoryList,
-        exact: true
+        exact: true,
     },
     {
         name: 'categories.create',
         label: 'Criar categoria',
         path: '/categories/create',
         component: CategoryForm,
-        exact: true
+        exact: true,
     },
     {
         name: 'categories.edit',
         label: 'Editar categoria',
         path: '/categories/:id/edit',
         component: CategoryForm,
-        exact: true
+        exact: true,
     },
     ////////////////////
     {
@@ -47,21 +51,21 @@ const routes: MyRouteProps[] = [
         label: 'Listar Membros',
         path: '/cast-members',
         component: CastMemberList,
-        exact: true
+        exact: true,
     },
     {
         name: 'cast-members.create',
         label: 'Criar membro',
         path: '/cast-members/create',
         component: CastMemberForm,
-        exact: true
+        exact: true,
     },
     {
         name: 'cast-members.edit',
         label: 'Editar membro',
         path: '/cast-members/:id/edit',
         component: CastMemberForm,
-        exact: true
+        exact: true,
     },
     ////////////////////////////////
     {
@@ -69,21 +73,50 @@ const routes: MyRouteProps[] = [
         label: 'Listar Gêneros',
         path: '/genres',
         component: GenresList,
-        exact: true
+        exact: true,
     },
     {
         name: 'genres.create',
         label: 'Criar gênero',
         path: '/genres/create',
         component: GenresForm,
-        exact: true
+        exact: true,
     },
     {
         name: 'genres.edit',
         label: 'Editar gênero',
         path: '/genres/:id/edit',
         component: GenresForm,
-        exact: true
+        exact: true,
+    },
+    ///////////////////////////////
+    {
+        name: 'videos.list',
+        label: 'Listar Video',
+        path: '/videos',
+        component: VideosList,
+        exact: true,
+    },
+    {
+        name: 'videos.create',
+        label: 'Criar Video',
+        path: '/videos/create',
+        component: VideosForm,
+        exact: true,
+    },
+    {
+        name: 'videos.edit',
+        label: 'Editar Video',
+        path: '/videos/:id/edit',
+        component: VideosForm,
+        exact: true,
+    },
+    {
+        name: 'uploads',
+        label: 'Uploads',
+        path: '/uploads',
+        component: Uploads,
+        exact: true,
     },
 ];
 

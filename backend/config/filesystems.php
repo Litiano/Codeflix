@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Default Filesystem Disk
@@ -26,7 +25,7 @@ return [
     |
     */
 
-    'cloud' => env('FILESYSTEM_CLOUD', 's3'),
+    'cloud' => env('FILESYSTEM_CLOUD', 'gcs'),
 
     /*
     |--------------------------------------------------------------------------
@@ -42,7 +41,6 @@ return [
     */
 
     'disks' => [
-
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app'),
@@ -51,13 +49,13 @@ return [
         'video_local' => [
             'driver' => 'local',
             'root' => storage_path('app/public/videos'),
-            'url' => env('APP_URL') . '/storage/videos',
+            'url' => env('APP_URL').'/storage/videos',
         ],
 
         'gcs' => [
             'driver' => 'gcs',
             'project_id' => env('GOOGLE_CLOUD_PROJECT_ID', 'your-project-id'),
-            'key_file' => storage_path('credentials/google/' . env('GOOGLE_CLOUD_KEY_FILE', null)), // optional: /path/to/service-account.json
+            'key_file' => storage_path('credentials/google/'.env('GOOGLE_CLOUD_KEY_FILE', null)), // optional: /path/to/service-account.json
             'bucket' => env('GOOGLE_CLOUD_STORAGE_BUCKET', 'your-bucket'),
             'path_prefix' => env('GOOGLE_CLOUD_STORAGE_PATH_PREFIX', null), // optional: /default/path/to/apply/in/bucket
             'storage_api_uri' => env('GOOGLE_CLOUD_STORAGE_API_URI', null), // see: Public URLs below
@@ -80,7 +78,20 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
         ],
-
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Symbolic Links
+    |--------------------------------------------------------------------------
+    |
+    | Here you may configure the symbolic links that will be created when the
+    | `storage:link` Artisan command is executed. The array keys should be
+    | the locations of the links and the values should be their targets.
+    |
+    */
+
+    'links' => [
+        public_path('storage') => storage_path('app/public'),
+    ],
 ];

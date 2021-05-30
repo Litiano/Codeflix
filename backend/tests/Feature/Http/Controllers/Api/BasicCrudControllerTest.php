@@ -13,15 +13,33 @@ use Tests\Stubs\Controllers\CategoryControllerStub;
 use Tests\Stubs\Models\CategoryStub;
 use Tests\TestCase;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class BasicCrudControllerTest extends TestCase
 {
     protected Controller $controller;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        CategoryStub::dropTable();
+        CategoryStub::createTable();
+        $this->controller = new CategoryControllerStub();
+    }
+
+    protected function tearDown(): void
+    {
+        CategoryStub::dropTable();
+        parent::tearDown();
+    }
 
     public function testIndex()
     {
         /** @var CategoryStub $category */
         $category = CategoryStub::create(['name' => 'teste name', 'description' => 'test descrição']);
-        $result = $this->controller->index();
+        $result = $this->controller->index(\request());
         $serialized = $result->response()->getData(true);
         $this->assertEquals([$category->toArray()], $serialized['data']);
         $this->assertArrayHasKey('meta', $serialized);
@@ -35,7 +53,8 @@ class BasicCrudControllerTest extends TestCase
         $request = Mockery::mock(Request::class);
         $request->shouldReceive('all')
             ->once()
-            ->andReturn(['name' => '']);
+            ->andReturn(['name' => ''])
+        ;
 
         $this->expectException(ValidationException::class);
         $this->controller->store($request);
@@ -48,7 +67,8 @@ class BasicCrudControllerTest extends TestCase
         $request = Mockery::mock(Request::class);
         $request->shouldReceive('all')
             ->once()
-            ->andReturn(['name' => 'test name', 'description' => 'test description']);
+            ->andReturn(['name' => 'test name', 'description' => 'test description'])
+        ;
 
         $result = $this->controller->store($request);
         $serialized = $result->response()->getData(true);
@@ -89,9 +109,13 @@ class BasicCrudControllerTest extends TestCase
     {
         $category = CategoryStub::create(['name' => 'teste name', 'description' => 'test descrição']);
         $request = Mockery::mock(Request::class);
+        $request->shouldReceive([
+            'isMethod' => 'PATCH',
+        ]);
         $request->shouldReceive('all')
             ->once()
-            ->andReturn(['name' => 'test name change', 'description' => 'test description changed']);
+            ->andReturn(['name' => 'test name change', 'description' => 'test description changed'])
+        ;
 
         $result = $this->controller->update($request, $category->id);
         $serialized = $result->response()->getData(true);
@@ -107,22 +131,9 @@ class BasicCrudControllerTest extends TestCase
         $response = $this->controller->destroy($category->id);
 
         $this->createTestResponse($response)
-            ->assertStatus(204);
+            ->assertStatus(204)
+        ;
 
         $this->assertCount(0, CategoryStub::all());
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        CategoryStub::dropTable();
-        CategoryStub::createTable();
-        $this->controller = new CategoryControllerStub();
-    }
-
-    protected function tearDown(): void
-    {
-        CategoryStub::dropTable();
-        parent::tearDown();
     }
 }

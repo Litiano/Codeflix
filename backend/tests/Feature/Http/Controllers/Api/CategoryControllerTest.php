@@ -93,7 +93,7 @@ class CategoryControllerTest extends TestCase
 
     public function testUpdate()
     {
-        $this->category = factory(Category::class)->create([
+        $this->category = Category::factory()->create([
             'is_active' => false, 'description' => 'description'
         ]);
         $data = [
@@ -128,7 +128,7 @@ class CategoryControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->category = factory(Category::class)->create();
+        $this->category = Category::factory()->create();
     }
 
     protected function routeStore(): string

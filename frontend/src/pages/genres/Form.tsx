@@ -1,32 +1,23 @@
 import * as React from 'react';
 import {
-    Box,
-    Button,
-    ButtonProps,
     Checkbox,
     TextField,
-    Theme,
-    makeStyles,
     FormControlLabel,
     MenuItem
 } from "@material-ui/core";
 import {useForm} from "react-hook-form";
 import genreHttp from "../../utils/http/genre-http";
-import {watch} from "fs";
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import categoryHttp from "../../utils/http/category-http";
 import {useHistory, useParams} from "react-router-dom";
 import {useSnackbar} from "notistack";
 import * as yup from "../../utils/vendor/yup";
 import {yupResolver} from "@hookform/resolvers/yup";
-
-const useStyles = makeStyles((theme: Theme) => {
-    return {
-        submit: {
-            margin: theme.spacing(1),
-        }
-    }
-});
+import {Category, Genre} from "../../utils/models";
+import SubmitActions from "../../components/SubmitActions";
+import {DefaultForm} from "../../components/DefaultForm";
+import useSnackbarFormError from "../../hooks/useSnackbarFormError";
+import LoadingContext from "../../components/loading/LoadingContext";
 
 const validationSchema = yup.object().shape({
     name: yup.string().label('Nome').required().max(255),
@@ -34,22 +25,24 @@ const validationSchema = yup.object().shape({
 });
 
 export const Form = () => {
-    const classes = useStyles();
-    const [loading, setLoading] = useState<boolean>(false);
+    const loading = useContext(LoadingContext);
     const history = useHistory();
     const snackbar = useSnackbar();
-    const [categories, setCategories] = useState<any[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const {id} = useParams();
-    const [genre, setGenre] = useState<{id: string} | null>(null);
+    const [, setGenre] = useState<Genre | null>(null);
 
-    const buttonProps: ButtonProps = {
-        color: 'secondary',
-        variant: 'contained',
-        className: classes.submit,
-        disabled: loading,
-    }
-
-    const {register, handleSubmit, getValues, setValue, errors, reset, watch} = useForm({
+    const {
+        register,
+        handleSubmit,
+        getValues,
+        setValue,
+        errors,
+        reset,
+        watch,
+        trigger,
+        formState
+    } = useForm({
         resolver: yupResolver(validationSchema),
         defaultValues: {
             name: '',
@@ -57,39 +50,44 @@ export const Form = () => {
         }
     });
 
+    useSnackbarFormError(formState.submitCount, errors);
+
     useEffect(() => {
         register({name: 'categories_id'})
     }, [register]);
 
     useEffect(() => {
-        async function loadData() {
-            setLoading(true);
-            const promises = [categoryHttp.list()];
+        let isSubscribed = true;
+        (async function loadData() {
+            const promises = [categoryHttp.list({queryOptions: {all: ''}})];
             if (id) {
                 promises.push(genreHttp.get(id));
             }
             try {
                 const [categoriesResponse, genreResponse] = await Promise.all(promises);
-                setCategories(categoriesResponse.data.data);
-                if (id) {
-                    setGenre(genreResponse.data.data);
-                    reset({
-                        ...genreResponse.data.data,
-                        categories_id: genreResponse.data.data.categories.map(category => category.id)
-                    });
+                if (isSubscribed) {
+                    setCategories(categoriesResponse.data.data);
+                    if (id) {
+                        setGenre(genreResponse.data.data);
+                        reset({
+                            ...genreResponse.data.data,
+                            categories_id: genreResponse.data.data.categories.map(category => category.id)
+                        });
+                    }
                 }
             } catch (error) {
                 console.error(error);
                 snackbar.enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
-            } finally {
-                setLoading(false);
             }
+        })();
+
+        return () => {
+            isSubscribed = false;
         }
-        loadData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     async function onSubmit(formData, event) {
-        setLoading(true);
         try {
             const http = id ? genreHttp.update(id, formData) : genreHttp.create(formData);
             const {data} = await http;
@@ -108,18 +106,11 @@ export const Form = () => {
         } catch (error) {
             console.error(error);
             snackbar.enqueueSnackbar('Erro ao salvar gênero!', {variant: 'error'})
-        } finally {
-            setLoading(false);
         }
-        genreHttp
-            .create(formData)
-            .then(response => {
-                console.log(response)
-            })
     }
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <DefaultForm onSubmit={handleSubmit(onSubmit)} GridItemProps={{xs: 12, md: 6}}>
             <TextField
                 name={'name'}
                 label={'Nome'}
@@ -160,13 +151,21 @@ export const Form = () => {
             </TextField>
             <FormControlLabel
                 control={<Checkbox defaultChecked name="is_active" inputRef={register}/>}
+                disabled={loading}
                 label="Ativo?"
             />
-            <Box dir={'rtl'}>
-                <Button {...buttonProps} onClick={() => onSubmit(getValues(), null)}>Salvar</Button>
-                <Button {...buttonProps} type={'submit'}>Salvar e continuar editando</Button>
-            </Box>
-        </form>
+            <SubmitActions disabledButtons={loading}
+                           handleSave={
+                               async () => {
+                                   formState.submitCount++;
+                                   const result = await trigger();
+                                   if (result) {
+                                       await onSubmit(getValues(), null)
+                                   }
+                               }
+                           }
+            />
+        </DefaultForm>
     );
 };
 

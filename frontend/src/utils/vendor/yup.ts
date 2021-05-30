@@ -1,8 +1,10 @@
+/* eslint-disable no-template-curly-in-string */
 import {setLocale} from "yup";
 
 const ptBr = {
     mixed: {
-        required: '${path} é obrigatório'
+        required: '${path} é obrigatório',
+        notType: '${path} é inválido',
     },
     string: {
         max: '${path} precisa ter no máximo ${max} caracteres',

@@ -22,8 +22,8 @@ class GenresHasCategoriesRuleTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->categories = factory(Category::class, 4)->create();
-        $this->genres = factory(Genre::class, 2)->create();
+        $this->categories = Category::factory(4)->create();
+        $this->genres = Genre::factory(2)->create();
 
         $this->genres[0]->categories()->sync($this->categories->take(2));
         $this->genres[1]->categories()->sync($this->categories[2]);

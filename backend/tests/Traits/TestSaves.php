@@ -1,20 +1,20 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests\Traits;
 
-
-use Illuminate\Foundation\Testing\TestResponse;
+use Illuminate\Testing\TestResponse;
 
 trait TestSaves
 {
-    abstract protected function model():string;
+    abstract protected function model(): string;
 
     protected function assertStore(array $sendData, array $testDatabase, array $testJsonData = null): TestResponse
     {
         /** @var TestResponse $response */
         $response = $this->postJson($this->routeStore(), $sendData);
-        if ($response->status() !== 201) {
+        if (201 !== $response->status()) {
             throw new \Exception("Response status must be 201, given {$response->status()}:\n{$response->content()}");
         }
 
@@ -28,7 +28,7 @@ trait TestSaves
     {
         /** @var TestResponse $response */
         $response = $this->putJson($this->routeUpdate(), $sendData);
-        if ($response->status() !== 200) {
+        if (200 !== $response->status()) {
             throw new \Exception("Response status must be 200, given {$response->status()}:\n{$response->content()}");
         }
 
@@ -38,10 +38,15 @@ trait TestSaves
         return $response;
     }
 
+    protected function getIdFromResponse(TestResponse $response)
+    {
+        return $response->json('id') ?? $response->json('data.id');
+    }
+
     private function assertInDatabase(TestResponse $response, array $testDatabase): void
     {
         $model = $this->model();
-        $table = (new $model)->getTable();
+        $table = (new $model())->getTable();
         $this->assertDatabaseHas($table, $testDatabase + ['id' => $this->getIdFromResponse($response)]);
     }
 
@@ -49,10 +54,5 @@ trait TestSaves
     {
         $testResponse = $testJsonData ?? $testDatabase;
         $response->assertJsonFragment($testResponse + ['id' => $this->getIdFromResponse($response)]);
-    }
-
-    protected function getIdFromResponse(TestResponse $response)
-    {
-        return $response->json('id') ?? $response->json('data.id');
     }
 }

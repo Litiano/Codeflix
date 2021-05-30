@@ -3,7 +3,6 @@
 
 namespace Tests\Feature\Models\Video;
 
-
 use App\Models\Video;
 use Illuminate\Database\Events\TransactionCommitted;
 use Illuminate\Http\UploadedFile;
@@ -53,7 +52,7 @@ class VideoUploadTest extends BaseVideoTestCase
     public function testUpdateWithFiles()
     {
         \Storage::fake();
-        $video = factory(Video::class)->create();
+        $video = Video::factory()->create();
         $thumbFile = UploadedFile::fake()->image('thumb.jpg');
         $videoFile = UploadedFile::fake()->image('video.mp4');
         $video->update($this->data + [
@@ -75,7 +74,7 @@ class VideoUploadTest extends BaseVideoTestCase
     public function testUpdateIfRollbackFiles()
     {
         \Storage::fake();
-        $video = factory(Video::class)->create();
+        $video = Video::factory()->create();
         \Event::listen(TransactionCommitted::class, function () {
             throw new TestException();
         });
@@ -103,7 +102,7 @@ class VideoUploadTest extends BaseVideoTestCase
             $fileFields[$field] = "{$field}.test";
         }
 
-        $video = factory(Video::class)->create($fileFields);
+        $video = Video::factory()->create($fileFields);
         $localDriver = config('filesystems.default');
         $baseUrl = config("filesystems.disks.{$localDriver}.url");
         foreach ($fileFields as $field => $value) {
@@ -120,7 +119,7 @@ class VideoUploadTest extends BaseVideoTestCase
             $fileFields[$field] = "{$field}.test";
         }
 
-        $video = factory(Video::class)->create($fileFields);
+        $video = Video::factory()->create($fileFields);
         $baseUrl = config("filesystems.disks.gcs.storage_api_uri");
         \Config::set('filesystems.default', 'gcs');
         foreach ($fileFields as $field => $value) {
@@ -131,7 +130,7 @@ class VideoUploadTest extends BaseVideoTestCase
 
     public function testFileUrlsIfNullWhenFieldsAreNull()
     {
-        $video = factory(Video::class)->create();
+        $video = Video::factory()->create();
         foreach (Video::getFileFields() as $field) {
             $fileUrl = $video->{"{$field}_url"};
             $this->assertNull($fileUrl);

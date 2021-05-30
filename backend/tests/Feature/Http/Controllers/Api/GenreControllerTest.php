@@ -7,7 +7,7 @@ use App\Http\Resources\GenreResource;
 use App\Models\Category;
 use App\Models\Genre;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\TestResponse;
+use Illuminate\Testing\TestResponse;
 use Illuminate\Http\Request;
 use Mockery;
 use Tests\Exceptions\TestException;
@@ -96,7 +96,7 @@ class GenreControllerTest extends TestCase
         $this->assertInvalidationupdateAction($data, 'exists');
 
         /** @var Category $category */
-        $category = factory(Category::class)->create();
+        $category = Category::factory()->create();
         $category->delete();
         $data = ['categories_id' => [$category->id]];
         $this->assertInvalidationStoreAction($data, 'exists');
@@ -105,13 +105,15 @@ class GenreControllerTest extends TestCase
 
     public function testStore()
     {
-        $categoryId = factory(Category::class)->create()->id;
+        $categoryId = Category::factory()->create()->id;
         $data = ['name' => 'test'];
         $response = $this->assertStore(
             $data + ['categories_id' => [$categoryId]],
             ['is_active' => true, 'deleted_at' => null]
         );
-        $response->assertJsonStructure(['data' => $this->fieldsSerialized]);
+        $fieldsSerialized = $this->fieldsSerialized;
+        unset($fieldsSerialized['categories']);
+        $response->assertJsonStructure(['data' => $fieldsSerialized]);
         $this->assertResource($response, new GenreResource(Genre::find($this->getIdFromResponse($response))));
 
         $this->assertHasCategory($this->getIdFromResponse($response), $categoryId);
@@ -129,8 +131,8 @@ class GenreControllerTest extends TestCase
 
     public function testUpdate()
     {
-        $categoryId = factory(Category::class)->create()->id;
-        $this->genre = factory(Genre::class)->create([
+        $categoryId = Category::factory()->create()->id;
+        $this->genre = Genre::factory()->create([
             'is_active' => false,
         ]);
         $data = ['is_active' => true, 'name' => 'test'];
@@ -146,7 +148,7 @@ class GenreControllerTest extends TestCase
 
     public function testSyncCategories()
     {
-        $categoriesId = factory(Category::class, 3)->create()->pluck('id')->toArray();
+        $categoriesId = Category::factory(3)->create()->pluck('id')->toArray();
 
         $sendData = [
             'name' => 'test',
@@ -258,7 +260,7 @@ class GenreControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->genre = factory(Genre::class)->create();
+        $this->genre = Genre::factory()->create();
     }
 
     protected function routeStore(): string

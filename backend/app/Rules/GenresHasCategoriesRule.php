@@ -18,9 +18,8 @@ class GenresHasCategoriesRule implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     * @return bool
+     * @param string $attribute
+     * @param mixed  $value
      */
     public function passes($attribute, $value): bool
     {
@@ -45,15 +44,8 @@ class GenresHasCategoriesRule implements Rule
         if (count($categoriesFound) !== count($this->categoriesId)) {
             return false;
         }
-        return true;
-    }
 
-    protected function getRows($genreId): Collection
-    {
-        return DB::table('category_genre')
-            ->where('genre_id', $genreId)
-            ->whereIn('category_id', $this->categoriesId)
-            ->get();
+        return true;
     }
 
     /**
@@ -62,5 +54,14 @@ class GenresHasCategoriesRule implements Rule
     public function message(): string
     {
         return 'A genre ID must be related at least a category ID.';
+    }
+
+    protected function getRows($genreId): Collection
+    {
+        return DB::table('category_genre')
+            ->where('genre_id', $genreId)
+            ->whereIn('category_id', $this->categoriesId)
+            ->get()
+        ;
     }
 }
