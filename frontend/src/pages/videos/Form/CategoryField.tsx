@@ -10,7 +10,7 @@ import {Category, Genre} from "../../../utils/models";
 import categoryHttp from "../../../utils/http/category-http";
 import {getGenresFromCategory} from "../../../utils/model-filter";
 import {grey} from "@material-ui/core/colors";
-import {MutableRefObject, RefAttributes, useImperativeHandle, useRef} from "react";
+import {MutableRefObject, RefAttributes, useCallback, useImperativeHandle, useRef} from "react";
 
 interface CategoryFieldProps extends RefAttributes<CategoryFieldProps> {
     categories: Category[];
@@ -40,7 +40,7 @@ export const CategoryField = React.forwardRef<CategoryFieldComponent, CategoryFi
     const autocompleteRef = useRef() as MutableRefObject<AsyncAutocompleteComponent>;
     const theme = useTheme();
 
-    function fetchOptions(searchText) {
+    const fetchOptions = useCallback((searchText) => {
         return autocompleteHttp(
             categoryHttp.list({
                 queryOptions: {
@@ -49,7 +49,7 @@ export const CategoryField = React.forwardRef<CategoryFieldComponent, CategoryFi
                 }
             })
         ).then(data => data.data);
-    }
+    }, [autocompleteHttp, genres]);
 
     useImperativeHandle(ref, () => ({
         clear: () => autocompleteRef.current.clear()

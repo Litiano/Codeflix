@@ -27,7 +27,7 @@ const validationSchema = yup.object().shape({
 export const Form = () => {
     const loading = useContext(LoadingContext);
     const history = useHistory();
-    const snackbar = useSnackbar();
+    const {enqueueSnackbar} = useSnackbar();
     const [categories, setCategories] = useState<Category[]>([]);
     const {id} = useParams();
     const [, setGenre] = useState<Genre | null>(null);
@@ -77,21 +77,20 @@ export const Form = () => {
                 }
             } catch (error) {
                 console.error(error);
-                snackbar.enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
+                enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
             }
         })();
 
         return () => {
             isSubscribed = false;
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [id, reset, enqueueSnackbar]);
 
     async function onSubmit(formData, event) {
         try {
             const http = id ? genreHttp.update(id, formData) : genreHttp.create(formData);
             const {data} = await http;
-            snackbar.enqueueSnackbar('Gênero salvo com sucesso!', {variant: 'success'});
+            enqueueSnackbar('Gênero salvo com sucesso!', {variant: 'success'});
             setTimeout(() => {
                 if (event) {
                     if (id) {
@@ -105,7 +104,7 @@ export const Form = () => {
             });
         } catch (error) {
             console.error(error);
-            snackbar.enqueueSnackbar('Erro ao salvar gênero!', {variant: 'error'})
+            enqueueSnackbar('Erro ao salvar gênero!', {variant: 'error'})
         }
     }
 

@@ -39,7 +39,7 @@ export const LoadingProvider = (props) => {
             removeGlobalRequestInterceptor(requestIds);
             removeGlobalResponseInterceptor(responseIds);
         }
-    }, [true]); // eslint-disable-line
+    }, []);
 
     function ignoreLoading(headers: object|undefined): boolean {
         return headers && headers.hasOwnProperty('x-ignore-loading') && headers['x-ignore-loading'];

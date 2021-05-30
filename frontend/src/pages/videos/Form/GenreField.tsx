@@ -8,7 +8,7 @@ import genreHttp from "../../../utils/http/genre-http";
 import {Category, Genre} from "../../../utils/models";
 import useCollectionManager from "../../../hooks/useCollectionManager";
 import {getGenresFromCategory} from "../../../utils/model-filter";
-import {MutableRefObject, RefAttributes, useImperativeHandle, useRef} from "react";
+import {MutableRefObject, RefAttributes, useCallback, useImperativeHandle, useRef} from "react";
 
 interface GenreFieldProps extends RefAttributes<GenreFieldProps> {
     genres: Genre[];
@@ -32,13 +32,13 @@ export const GenreField = React.forwardRef<GenreFieldComponent, GenreFieldProps>
     const autocompleteRef = useRef() as MutableRefObject<AsyncAutocompleteComponent>;
     const theme = useTheme();
 
-    function fetchOptions(searchText) {
+    const fetchOptions = useCallback((searchText) => {
         return autocompleteHttp(
             genreHttp.list({
                 queryOptions: {search: searchText, all: ''}
             })
         ).then(data => data.data)
-    }
+    }, [autocompleteHttp]);
 
     useImperativeHandle(ref, () => ({
         clear: () => autocompleteRef.current.clear()
