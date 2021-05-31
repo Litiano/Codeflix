@@ -31,6 +31,10 @@ steps:
     name: 'gcr.io/cloud-builders/docker'
     args: ['exec', '-t', '-w', '/var/www/html/backend', 'php', 'cp', '.env.example', '.env']
 
+  - id: 'Copiando .env.dusk.testing'
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['exec', '-t', '-w', '/var/www/html/backend', 'php', 'cp', '.env.dusk.testing.example', '.env.dusk.testing']
+
   - id: 'Copiando .env.testing'
     name: 'gcr.io/cloud-builders/docker'
     args: ['exec', '-t', '-w', '/var/www/html/backend', 'php', 'cp', '.env.testing.example', '.env.testing']
@@ -50,3 +54,23 @@ steps:
   - id: 'Rodando PhpUnit'
     name: 'gcr.io/cloud-builders/docker'
     args: ['exec', '-t', '-w', '/var/www/html/backend', 'php', 'php', 'vendor/bin/phpunit', '-c', 'phpunit.xml']
+
+  - id: 'Copiando .env frontend'
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['exec', '-t', '-w', '/var/www/html/frontend', 'php', 'cp', '.env.example', '.env']
+
+  - id: 'Frontend yarn install'
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['exec', '-t', '-w', '/var/www/html/frontend', 'php', 'yarn', 'install']
+
+  - id: 'Frontend exec script'
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['exec', '-t', '-w', '/var/www/html/frontend', 'php', 'chmod', 'u+x', 'scripts/build.sh']
+
+  - id: 'Frontend build'
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['exec', '-t', '-w', '/var/www/html/frontend', 'php', 'yarn', 'build-laravel']
+
+  - id: 'Frontend teste'
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['exec', '-t', '-w', '/var/www/html/backend', 'php', 'php', 'artisan', 'dusk', '--env=testing']

@@ -52,3 +52,8 @@ services:
     depends_on:
       - mysql
       - redis
+  selenium:
+    image: selenium/standalone-chrome
+    expose:
+      - 4444
+
