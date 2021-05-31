@@ -61,7 +61,7 @@ steps:
 
   - id: 'Frontend yarn install'
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', '-w', '/var/www/html/frontend', 'php', 'yarn', 'install']
+    args: ['exec', '-t', '-w', '/var/www/html/frontend', 'php', 'npm', 'install']
 
   - id: 'Frontend exec script'
     name: 'gcr.io/cloud-builders/docker'
@@ -69,7 +69,7 @@ steps:
 
   - id: 'Frontend build'
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', '-w', '/var/www/html/frontend', 'php', 'yarn', 'build-laravel']
+    args: ['exec', '-t', '-w', '/var/www/html/frontend', 'php', 'npm', 'run', 'build-laravel']
 
   - id: 'Frontend teste'
     name: 'gcr.io/cloud-builders/docker'
