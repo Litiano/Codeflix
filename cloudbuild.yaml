@@ -65,7 +65,7 @@ steps:
 
   - id: 'Frontend exec script'
     name: 'gcr.io/cloud-builders/docker'
-    args: ['exec', '-t', '-w', '/var/www/html/frontend', 'php', 'chmod', 'u+x', 'scripts/build.sh']
+    args: ['exec', '-t', '-w', '/var/www/html/frontend', 'php', 'chmod', '+x', 'scripts/build.sh']
 
   - id: 'Frontend build'
     name: 'gcr.io/cloud-builders/docker'
