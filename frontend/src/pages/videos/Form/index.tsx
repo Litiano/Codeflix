@@ -1,4 +1,4 @@
-import React, {createRef, MutableRefObject, useContext, useEffect, useRef, useState} from 'react';
+import React, {createRef, MutableRefObject, useCallback, useContext, useEffect, useRef, useState} from 'react';
 import * as yup from "../../../utils/vendor/yup";
 import {useSnackbar} from "notistack";
 import {useHistory, useParams} from "react-router-dom";
@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 const fileFields = Object.keys(VideoFileFieldMap);
 
 export const Form = () => {
-    const snackbar = useSnackbar();
+    const {enqueueSnackbar} = useSnackbar();
     const history = useHistory();
     const {id} = useParams();
     const loading = useContext(LoadingContext);
@@ -132,7 +132,16 @@ export const Form = () => {
         }
     });
 
-    // @todo não executa com botão salvar.
+    const resetForm = useCallback((data) => {
+        Object.keys(uploadsRef.current).forEach((field) => {
+            uploadsRef.current[field].current.clear();
+        });
+        castMemberRef.current.clear();
+        genreRef.current.clear();
+        categoryRef.current.clear();
+        reset(data);
+    }, [uploadsRef, castMemberRef, genreRef, categoryRef, reset]);
+
     useSnackbarFormError(formState.submitCount, errors);
 
     useEffect(() => {
@@ -150,14 +159,13 @@ export const Form = () => {
             try {
                 const {data} = await videoHttp.get(id);
                 setVideo(data.data);
-                reset(data.data);
+                resetForm(data.data);
             } catch (error) {
                 console.error(error);
-                snackbar.enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
+                enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
             }
         })();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [id, resetForm, enqueueSnackbar]);
 
     async function onSubmit(formData, event) {
         try {
@@ -168,7 +176,7 @@ export const Form = () => {
 
             const http = id ? videoHttp.update(id, sendData) : videoHttp.create(sendData);
             const {data} = await http;
-            snackbar.enqueueSnackbar('Vídeo salvo com sucesso!', {variant: 'success'});
+            enqueueSnackbar('Vídeo salvo com sucesso!', {variant: 'success'});
             setVideo(data.data);
             uploadFiles(data.data);
             id && resetForm(video);
@@ -185,18 +193,8 @@ export const Form = () => {
             });
         } catch (error) {
             console.error(error);
-            snackbar.enqueueSnackbar('Erro ao salvar vídeo!', {variant: 'error'})
+            enqueueSnackbar('Erro ao salvar vídeo!', {variant: 'error'})
         }
-    }
-
-    function resetForm(data) {
-        Object.keys(uploadsRef.current).forEach((field) => {
-            uploadsRef.current[field].current.clear();
-        });
-        castMemberRef.current.clear();
-        genreRef.current.clear();
-        categoryRef.current.clear();
-        reset(data);
     }
 
     function uploadFiles(video: Video) {
@@ -210,7 +208,7 @@ export const Form = () => {
 
         dispatch(Creators.addUpload({video, files}));
 
-        snackbar.enqueueSnackbar('', {
+        enqueueSnackbar('', {
             key: 'snackbar-upload',
             persist: true,
             anchorOrigin: {

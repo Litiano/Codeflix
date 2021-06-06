@@ -26,7 +26,7 @@ export const Form = () => {
     const [, setCategory] = useState<Category | null>(null);
     const loading = useContext(LoadingContext);
     const history = useHistory();
-    const snackbar = useSnackbar();
+    const {enqueueSnackbar} = useSnackbar();
 
     const {
         register,
@@ -65,17 +65,16 @@ export const Form = () => {
                 reset(data.data);
             } catch (error) {
                 console.error(error);
-                snackbar.enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
+                enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
             }
         })();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [id, reset, enqueueSnackbar]);
 
     async function onSubmit(formData, event) {
         try {
             const http = id ? categoryHttp.update(id, formData) : categoryHttp.create(formData);
             const {data} = await http;
-            snackbar.enqueueSnackbar('Categoria salva com sucesso!', {variant: 'success'});
+            enqueueSnackbar('Categoria salva com sucesso!', {variant: 'success'});
             setTimeout(() => {
                 if (event) {
                     if (id) {
@@ -89,7 +88,7 @@ export const Form = () => {
             });
         } catch (error) {
             console.error(error);
-            snackbar.enqueueSnackbar('Erro ao salvar categoria!', {variant: 'error'})
+            enqueueSnackbar('Erro ao salvar categoria!', {variant: 'error'})
         }
     }
 

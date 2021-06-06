@@ -1,8 +1,8 @@
 FROM php:8.0-fpm-alpine AS base
 
-RUN apk add --no-cache shadow openssl bash nano freetype-dev libjpeg-turbo-dev libpng-dev nodejs npm yarn
+RUN apk add --no-cache shadow openssl bash nano freetype-dev libjpeg-turbo-dev libpng-dev nodejs npm yarn libzip-dev
 
-RUN docker-php-ext-install pdo pdo_mysql
+RUN docker-php-ext-install pdo pdo_mysql zip
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 RUN docker-php-ext-install -j$(nproc) gd
 

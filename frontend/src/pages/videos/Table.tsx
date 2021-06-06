@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useMemo, useRef, useState} from 'react';
 import {Category, Genre, ListResponse, Video} from "../../utils/models";
 import DefaultTable, {makeActionStyles, MuiDataTableRefComponent, TableColumn} from "../../components/Table";
 import map from "lodash/map";
@@ -101,7 +101,7 @@ const rowsPerPageOptions = [15, 25, 50];
 const debounceTime = 500;
 
 const Table = (props: Props) => {
-    const snackbar = useSnackbar();
+    const {enqueueSnackbar} = useSnackbar();
     const subscribed = useRef(true);
     const [data, setData] = useState<Video[]>([]);
     const loading = useContext(LoadingContext);
@@ -109,21 +109,8 @@ const Table = (props: Props) => {
     const [, setCategories] = useState<Category[]>();
     const [, setGenres] = useState<Genre[]>();
     const {openDeleteDialog, setOpenDeleteDialog, rowsToDelete, setRowsToDelete} = useDeleteCollection();
-
-    const {
-        columns,
-        filterManager,
-        filterState,
-        debouncedFilterState,
-        totalRecords,
-        setTotalRecords,
-    } = useFilter({
-        columns: columnsDefinition,
-        debounceTime: debounceTime,
-        rowsPerPage,
-        rowsPerPageOptions,
-        tableRef,
-        extraFilter: {
+    const extraFilter = useMemo(() => (
+        {
             createValidationSchema: () => {
                 return yup.object().shape({
                     categories: yup.mixed()
@@ -159,8 +146,25 @@ const Table = (props: Props) => {
                 }
             }
         }
-    });
+    ), []);
 
+    const {
+        columns,
+        filterManager,
+        cleanSearchText,
+        filterState,
+        debouncedFilterState,
+        totalRecords,
+        setTotalRecords,
+    } = useFilter({
+        columns: columnsDefinition,
+        debounceTime: debounceTime,
+        rowsPerPage,
+        rowsPerPageOptions,
+        tableRef,
+        extraFilter
+    });
+    const searchText = cleanSearchText(debouncedFilterState.search);
 
     const indexColumnCategories = columns.findIndex(c => c.name === 'categories');
     const columnCategories = columns[indexColumnCategories];
@@ -172,20 +176,56 @@ const Table = (props: Props) => {
     const genresFilterValue = filterState.extraFilter && filterState.extraFilter.genres as never;
     (columnGenres.options as any).filterList = genresFilterValue ? [genresFilterValue] : [];
 
+    const getData = useCallback(async ({search, page, per_page, sort, dir, categories, genres}) => {
+        try {
+            if (!subscribed.current) {
+                return;
+            }
+            const {data} = await videoHttp.list<ListResponse<Video>>({
+                queryOptions: {
+                    search,
+                    page,
+                    per_page,
+                    sort,
+                    dir,
+                    ...({categories: categories?.join(',')}),
+                    ...({genres: genres?.join(',')}),
+                }
+            });
+            setData(data.data);
+            setTotalRecords(data.meta.total);
+            setOpenDeleteDialog(false);
+        } catch (error) {
+            if (videoHttp.isCancelRequest(error)) {
+                return;
+            }
+            console.error(error);
+            enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
+        }
+    }, [enqueueSnackbar, setTotalRecords, setOpenDeleteDialog]);
+
     useEffect(() => {
         subscribed.current = true;
-        filterManager.pushHistory();
-        getData();
+        getData({
+            search: searchText,
+            page: debouncedFilterState.pagination.page,
+            per_page: debouncedFilterState.pagination.per_page,
+            sort: debouncedFilterState.order.sort,
+            dir: debouncedFilterState.order.dir,
+            categories: debouncedFilterState?.extraFilter?.categories,
+            genres: debouncedFilterState?.extraFilter?.genres,
+        });
         return () => {
             subscribed.current = false;
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
-        filterManager.cleanSearchText(debouncedFilterState.search), // eslint-disable-line react-hooks/exhaustive-deps
+        getData,
+        searchText,
+        debouncedFilterState,
         debouncedFilterState.pagination.page,
         debouncedFilterState.pagination.per_page,
         debouncedFilterState.order,
-        JSON.stringify(debouncedFilterState.extraFilter), // eslint-disable-line react-hooks/exhaustive-deps
+        debouncedFilterState.extraFilter,
     ]);
 
     useEffect(() => {
@@ -199,10 +239,10 @@ const Table = (props: Props) => {
                 }
             } catch (error) {
                 console.error(error);
-                snackbar.enqueueSnackbar('Não foi possível carregar as informações', {variant: 'error'})
+                enqueueSnackbar('Não foi possível carregar as informações', {variant: 'error'})
             }
         })();
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [columnCategories.options, enqueueSnackbar]);
 
     useEffect(() => {
         let isSubscribed = true;
@@ -215,47 +255,10 @@ const Table = (props: Props) => {
                 }
             } catch (error) {
                 console.error(error);
-                snackbar.enqueueSnackbar('Não foi possível carregar as informações', {variant: 'error'})
+                enqueueSnackbar('Não foi possível carregar as informações', {variant: 'error'})
             }
         })();
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-    async function getData() {
-        filterManager.pushHistory();
-        try {
-            if (!subscribed.current) {
-                return;
-            }
-            const {data} = await videoHttp.list<ListResponse<Video>>({
-                queryOptions: {
-                    search: filterManager.cleanSearchText(filterState.search),
-                    page: filterState.pagination.page,
-                    per_page: filterState.pagination.per_page,
-                    sort: filterState.order.sort,
-                    dir: filterState.order.dir,
-                    ...(
-                        debouncedFilterState.extraFilter &&
-                        debouncedFilterState.extraFilter.categories &&
-                        {categories: debouncedFilterState.extraFilter.categories.join(',')}
-                    ),
-                    ...(
-                        debouncedFilterState.extraFilter &&
-                        debouncedFilterState.extraFilter.genres &&
-                        {genres: debouncedFilterState.extraFilter.genres.join(',')}
-                    ),
-                }
-            });
-            setData(data.data);
-            setTotalRecords(data.meta.total);
-            setOpenDeleteDialog(false);
-        } catch (error) {
-            if (videoHttp.isCancelRequest(error)) {
-                return;
-            }
-            console.error(error);
-            snackbar.enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
-        }
-    }
+    }, [columnGenres.options, enqueueSnackbar]);
 
     function deleteRows(confirmed: boolean) {
         if (!confirmed) {
@@ -267,17 +270,25 @@ const Table = (props: Props) => {
             .join(',');
         videoHttp.deleteCollection({ids})
             .then((response) => {
-                snackbar.enqueueSnackbar('Registros excluídos com sucesso!', {variant: 'success'});
+                enqueueSnackbar('Registros excluídos com sucesso!', {variant: 'success'});
                 const page = filterState.pagination.page;
 
                 if (rowsToDelete.data.length === data.length && page > 1) {
                     filterManager.changePage(page - 2)
                 } else {
-                    getData();
+                    getData({
+                        search: searchText,
+                        page: debouncedFilterState.pagination.page,
+                        per_page: debouncedFilterState.pagination.per_page,
+                        sort: debouncedFilterState.order.sort,
+                        dir: debouncedFilterState.order.dir,
+                        categories: debouncedFilterState?.extraFilter?.categories,
+                        genres: debouncedFilterState?.extraFilter?.genres,
+                    });
                 }
             }).catch((error) => {
                 console.error(error);
-                snackbar.enqueueSnackbar('Não foi possível excluir os registros', {variant: 'error'});
+                enqueueSnackbar('Não foi possível excluir os registros', {variant: 'error'});
         });
     }
 
@@ -294,7 +305,7 @@ const Table = (props: Props) => {
                     searchText: filterState.search as any,
                     page: filterState.pagination.page - 1,
                     rowsPerPage: filterState.pagination.per_page,
-                    rowsPerPageOptions: filterManager.rowsPerPageOptions,
+                    rowsPerPageOptions: rowsPerPageOptions,
                     count: totalRecords,
                     serverSide: true,
                     onFilterChange: (column, filterList) => {

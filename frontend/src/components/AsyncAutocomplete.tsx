@@ -17,7 +17,7 @@ export interface AsyncAutocompleteComponent {
 }
 
 export const AsyncAutocomplete = React.forwardRef<AsyncAutocompleteComponent, AsyncAutocompleteProps> ((props, ref) => {
-    const {AutocompleteProps, debounceTime = 300} = props;
+    const {AutocompleteProps, debounceTime = 300, fetchOptions} = props;
     const {freeSolo, onOpen, onClose, onInputChange} = props.AutocompleteProps as any;
     const [open, setOpen] = useState<boolean>(false);
     const [searchText, setSearchText] = useState<string>('');
@@ -85,7 +85,7 @@ export const AsyncAutocomplete = React.forwardRef<AsyncAutocompleteComponent, As
         (async () => {
             try {
                 if (isSubscribed) {
-                    const data = await props.fetchOptions(debouncedSearchText);
+                    const data = await fetchOptions(debouncedSearchText);
                     setOptions(data);
                 }
             } catch(error) {
@@ -95,8 +95,7 @@ export const AsyncAutocomplete = React.forwardRef<AsyncAutocompleteComponent, As
         return () => {
             isSubscribed = false;
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [freeSolo ? debouncedSearchText : open]);
+    }, [freeSolo, debouncedSearchText, open, fetchOptions]);
 
     useImperativeHandle(ref, () => ({
         clear: () => {

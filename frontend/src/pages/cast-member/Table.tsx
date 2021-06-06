@@ -1,5 +1,5 @@
- import * as React from 'react';
-import {useContext, useEffect, useRef, useState} from "react";
+import * as React from 'react';
+import {useCallback, useContext, useEffect, useMemo, useRef, useState} from "react";
 import {parseISO, format} from 'date-fns';
 import castMemberHttp from "../../utils/http/cast-member-http";
 import {CastMember, CastMemberTypeMap, ListResponse} from "../../utils/models";
@@ -15,7 +15,7 @@ import {invert} from 'lodash';
 import {FilterResetButton} from "../../components/Table/FilterResetButton";
 import LoadingContext from "../../components/loading/LoadingContext";
 import useDeleteCollection from "../../hooks/useDeleteCollection";
- import DeleteDialog from "../../components/DeleteDialog";
+import DeleteDialog from "../../components/DeleteDialog";
 
 const castMemberNames = Object.values(CastMemberTypeMap);
 
@@ -89,26 +89,13 @@ const debounceTime = 500;
 
 const Table = (props: Props) => {
     const [data, setData] = useState<CastMember[]>([]);
-    const snackbar = useSnackbar();
+    const {enqueueSnackbar} = useSnackbar();
     const loading = useContext(LoadingContext);
     const tableRef = useRef() as React.MutableRefObject<MuiDataTableRefComponent>;
     const subscribed = useRef(true);
     const {openDeleteDialog, setOpenDeleteDialog, rowsToDelete, setRowsToDelete} = useDeleteCollection();
-
-    const {
-        columns,
-        filterManager,
-        filterState,
-        debouncedFilterState,
-        totalRecords,
-        setTotalRecords,
-    } = useFilter({
-        columns: columnsDefinition,
-        debounceTime: debounceTime,
-        rowsPerPage,
-        rowsPerPageOptions,
-        tableRef,
-        extraFilter: {
+    const extraFilter = useMemo(() => (
+        {
             createValidationSchema: () => {
                 return yup.object().shape({
                     type: yup.string()
@@ -138,46 +125,44 @@ const Table = (props: Props) => {
                 }
             }
         }
+    ), []);
+
+    const {
+        columns,
+        filterManager,
+        filterState,
+        cleanSearchText,
+        debouncedFilterState,
+        totalRecords,
+        setTotalRecords,
+    } = useFilter({
+        columns: columnsDefinition,
+        debounceTime: debounceTime,
+        rowsPerPage,
+        rowsPerPageOptions,
+        tableRef,
+        extraFilter
     });
 
+    const searchText = cleanSearchText(debouncedFilterState.search);
     const indexColumnType = columns.findIndex(c => c.name === 'type');
     const columnType = columns[indexColumnType];
     const typeFilterValue = filterState.extraFilter && filterState.extraFilter.type as never;
     (columnType.options as any).filterList = typeFilterValue ? [typeFilterValue] : [];
 
-    useEffect(() => {
-        subscribed.current = true;
-        filterManager.pushHistory();
-        getData();
-        return () => {
-            subscribed.current = false;
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-        filterManager.cleanSearchText(debouncedFilterState.search), // eslint-disable-line react-hooks/exhaustive-deps
-        debouncedFilterState.pagination.page,
-        debouncedFilterState.pagination.per_page,
-        debouncedFilterState.order,
-        JSON.stringify(debouncedFilterState.extraFilter), // eslint-disable-line react-hooks/exhaustive-deps
-    ]);
-
-    async function getData() {
+    const getData = useCallback(async ({search, page, per_page, sort, dir, type}) => {
         try {
             if (!subscribed.current) {
                 return;
             }
             const {data} = await castMemberHttp.list<ListResponse<CastMember>>({
                 queryOptions: {
-                    search: filterManager.cleanSearchText(filterState.search),
-                    page: filterState.pagination.page,
-                    per_page: filterState.pagination.per_page,
-                    sort: filterState.order.sort,
-                    dir: filterState.order.dir,
-                    ...(
-                        debouncedFilterState.extraFilter &&
-                            debouncedFilterState.extraFilter.type &&
-                        {type: invert(CastMemberTypeMap)[debouncedFilterState.extraFilter.type]}
-                    )
+                    search,
+                    page,
+                    per_page,
+                    sort,
+                    dir,
+                    ...(type && {type: invert(CastMemberTypeMap)[type]}),
                 }
             });
             setData(data.data);
@@ -188,9 +173,32 @@ const Table = (props: Props) => {
                 return;
             }
             console.error(error);
-            snackbar.enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
+            enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
         }
-    }
+    }, [enqueueSnackbar, setTotalRecords, setOpenDeleteDialog]);
+
+    useEffect(() => {
+        subscribed.current = true;
+        getData({
+            search: searchText,
+            page: debouncedFilterState.pagination.page,
+            per_page: debouncedFilterState.pagination.per_page,
+            sort: debouncedFilterState.order.sort,
+            dir: debouncedFilterState.order.dir,
+            type: debouncedFilterState?.extraFilter?.type,
+        });
+        return () => {
+            subscribed.current = false;
+        }
+    }, [
+        getData,
+        searchText,
+        debouncedFilterState,
+        debouncedFilterState.pagination.page,
+        debouncedFilterState.pagination.per_page,
+        debouncedFilterState.order,
+        debouncedFilterState.extraFilter,
+    ]);
 
     function deleteRows(confirmed: boolean) {
         if (!confirmed) {
@@ -202,17 +210,24 @@ const Table = (props: Props) => {
             .join(',');
         castMemberHttp.deleteCollection({ids})
             .then((response) => {
-                snackbar.enqueueSnackbar('Registros excluídos com sucesso!', {variant: 'success'});
+                enqueueSnackbar('Registros excluídos com sucesso!', {variant: 'success'});
                 const page = filterState.pagination.page;
 
                 if (rowsToDelete.data.length === data.length && page > 1) {
                     filterManager.changePage(page - 2)
                 } else {
-                    getData();
+                    getData({
+                        search: searchText,
+                        page: filterState.pagination.page,
+                        per_page: filterState.pagination.per_page,
+                        sort: filterState.order.sort,
+                        dir: filterState.order.dir,
+                        type: debouncedFilterState?.extraFilter?.type,
+                    });
                 }
             }).catch((error) => {
             console.error(error);
-            snackbar.enqueueSnackbar('Não foi possível excluir os registros', {variant: 'error'});
+            enqueueSnackbar('Não foi possível excluir os registros', {variant: 'error'});
         });
     }
 
@@ -229,7 +244,7 @@ const Table = (props: Props) => {
                     searchText: filterState.search as any,
                     page: filterState.pagination.page - 1,
                     rowsPerPage: filterState.pagination.per_page,
-                    rowsPerPageOptions: filterManager.rowsPerPageOptions,
+                    rowsPerPageOptions: rowsPerPageOptions,
                     count: totalRecords,
                     serverSide: true,
                     onFilterChange: (column, filterList) => {

@@ -27,7 +27,7 @@ const validationSchema = yup.object().shape({
 });
 
 export const Form = () => {
-    const snackbar = useSnackbar();
+    const {enqueueSnackbar} = useSnackbar();
     const history = useHistory();
     const {id} = useParams();
     const [, setCastMember] = useState<CastMember | null>(null);
@@ -65,11 +65,10 @@ export const Form = () => {
                 reset(data.data);
             } catch (error) {
                 console.error(error);
-                snackbar.enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
+                enqueueSnackbar('Não foi possível carregar as informações.', {variant: 'error'});
             }
         })();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [id, reset, enqueueSnackbar]);
 
     useEffect(() => {
         register({name: 'type'})
@@ -79,7 +78,7 @@ export const Form = () => {
         try {
             const http = id ? castMemberHttp.update(id, formData) : castMemberHttp.create(formData);
             const {data} = await http;
-            snackbar.enqueueSnackbar('Membro salvo com sucesso!', {variant: 'success'});
+            enqueueSnackbar('Membro salvo com sucesso!', {variant: 'success'});
             setTimeout(() => {
                 if (event) {
                     if (id) {
@@ -93,7 +92,7 @@ export const Form = () => {
             });
         } catch (error) {
             console.error(error);
-            snackbar.enqueueSnackbar('Erro ao salvar membro!', {variant: 'error'});
+            enqueueSnackbar('Erro ao salvar membro!', {variant: 'error'});
         }
     }
 
